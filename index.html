@@ -2,1105 +2,2561 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>暗記カード</title>
 <style>
-:root{
-  --bg:#0a0a0f;--surface:#14141f;--surface2:#1e1e2e;--border:#2a2a3e;
-  --text:#e0e0e8;--text-dim:#8888a0;--accent:#6c5ce7;--accent-light:#a29bfe;
-  --correct:#00b894;--wrong:#e17055;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.4);
-}
+:root{--bg:#0a0a0f;--surface:#14141f;--surface2:#1e1e2e;--border:#2a2a3e;--text:#e0e0e8;--dim:#8888a0;--accent:#6c5ce7;--correct:#00b894;--wrong:#e17055;--radius:12px;--shadow:0 4px 24px #0006}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Kaku Gothic ProN',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-.app{max-width:520px;margin:0 auto;padding:16px;min-height:100vh}
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:16px;border-bottom:1px solid var(--border)}
-.header h1{font-size:18px;font-weight:600}
-.header-actions{display:flex;gap:8px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);font-size:14px;cursor:pointer;transition:all 0.15s;user-select:none}
-.btn:hover{border-color:var(--accent);background:#1a1a2e}
-.btn:active{transform:scale(0.97)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button,input,textarea,select{font-family:inherit}
+button:disabled{opacity:.5;cursor:not-allowed}
+.app{max-width:520px;margin:auto;padding:16px;min-height:100vh}
+.header,.flex-between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.header{padding:12px 0;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.header h1{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-actions,.deck-actions,.card-actions,.answer-buttons,.session-nav{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);font-size:14px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:active:not(:disabled){transform:scale(.97)}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn-primary:hover{background:#5b4bd6}
 .btn-correct{background:var(--correct);border-color:var(--correct);color:#fff}
-.btn-correct:hover{opacity:0.85}
 .btn-wrong{background:var(--wrong);border-color:var(--wrong);color:#fff}
-.btn-wrong:hover{opacity:0.85}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn-icon{padding:8px;width:36px;height:36px}
 .btn-block{width:100%}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
-.deck-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:border-color 0.15s}
-.deck-item:hover{border-color:var(--accent)}
-.deck-item-info h3{font-size:15px;margin-bottom:2px}
-.deck-item-info span{font-size:12px;color:var(--text-dim)}
-.deck-actions{display:flex;gap:4px}
-input[type="text"],input[type="number"],textarea,select{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.15s;font-family:inherit}
+.deck-item,.card-list-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer}
+.deck-item{padding:14px 16px;border-radius:var(--radius);margin-bottom:8px}
+.deck-item:hover,.card-list-item.selected{border-color:var(--accent)}
+.deck-item-info,.front-preview{min-width:0}
+.deck-item-info h3,.front-preview{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck-item-info h3{font-size:15px}
+.deck-item-info span,label,.text-dim{color:var(--dim)}
+.deck-item-info span,.text-sm{font-size:12px}
+input[type=text],input[type=number],textarea,select{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 textarea{resize:vertical;min-height:60px}
-label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:6px}
+label{display:block;font-size:13px;margin-bottom:6px}
 .form-group{margin-bottom:14px}
-.file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-dim);font-size:13px;cursor:pointer;transition:border-color 0.15s}
-.file-drop:hover,.file-drop.dragover{border-color:var(--accent);color:var(--accent-light)}
+.file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;color:var(--dim);font-size:13px;cursor:pointer}
+.file-drop:hover,.file-drop.dragover{border-color:var(--accent)}
 .flashcard-container{perspective:1000px;margin-bottom:20px}
-.flashcard{width:100%;min-height:280px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform 0.5s;border-radius:var(--radius)}
-.flashcard.no-transition{transition:none!important}
+.flashcard{width:100%;min-height:280px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .5s}
+.flashcard.no-transition{transition:none}
 .flashcard.flipped{transform:rotateY(180deg)}
 .flashcard-face{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);gap:12px;overflow-y:auto}
 .flashcard-back{transform:rotateY(180deg)}
-.flashcard-face .card-text{font-size:20px;text-align:center;word-break:break-word}
-.flashcard-face .card-note{font-size:13px;color:var(--text-dim);text-align:center;word-break:break-word;margin-top:4px;white-space:pre-wrap;border-top:1px solid var(--border);padding-top:8px;width:100%}
+.card-text{font-size:20px;text-align:center;white-space:pre-wrap;word-break:break-word}
+.card-note{font-size:13px;color:var(--dim);text-align:center;white-space:pre-wrap;border-top:1px solid var(--border);padding-top:8px;width:100%}
 .flashcard-face img{max-width:100%;max-height:160px;border-radius:8px}
 .flashcard-face audio{width:90%}
-.flashcard-label{position:absolute;top:10px;left:14px;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
-.progress-bar{width:100%;height:4px;background:var(--surface2);border-radius:2px;margin-bottom:16px;overflow:hidden}
-.progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s}
-.answer-buttons{display:flex;gap:10px}
-.answer-buttons .btn{flex:1;padding:14px;font-size:15px}
-.session-nav{display:flex;gap:10px;margin-bottom:10px}
-.session-nav .btn{flex:1}
+.flashcard-label{position:absolute;top:10px;left:14px;font-size:11px;color:var(--dim)}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent)}
+.answer-buttons .btn,.session-nav .btn{flex:1}
+.answer-buttons .btn{padding:14px;font-size:15px}
+.session-nav{margin-bottom:10px}
 .session-result{text-align:center}
-.session-result h2{margin-bottom:12px;font-size:22px}
-.result-stats{display:flex;justify-content:center;gap:32px;margin:20px 0}
+.session-result h2{margin-bottom:12px}
+.result-stats{display:flex;justify-content:center;gap:32px;margin:20px}
 .result-stat{text-align:center}
 .result-stat .num{font-size:36px;font-weight:700}
-.result-stat .label{font-size:12px;color:var(--text-dim)}
+.result-stat .label{font-size:12px;color:var(--dim)}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
-.toggle-row span{font-size:14px}
-.switch{width:44px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s}
+.switch{width:44px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;position:relative;cursor:pointer}
 .switch.on{background:var(--accent);border-color:var(--accent)}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left 0.2s}
-.switch.on::after{left:22px}
-.view{display:none}
-.view.active{display:block}
-.card-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:13px}
-.card-list-item.selected{border-color:var(--accent);background:#1a1a2e}
-.card-list-item .front-preview{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-list-item .meta-icons{display:flex;gap:4px;color:var(--text-dim);font-size:11px;margin-left:8px}
-.card-list-item .card-actions{display:flex;gap:4px;margin-left:8px}
-.history-dots{display:flex;gap:3px;margin-left:8px;align-items:center}
-.history-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.history-dot.correct{background:var(--correct)}
-.history-dot.wrong{background:var(--wrong)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:opacity 0.2s,visibility 0.2s}
+.switch:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
+.switch.on:after{left:22px}
+.view{display:none}.view.active{display:block}
+.card-list-item{padding:10px 14px;border-radius:8px;margin-bottom:6px;font-size:13px}
+.front-preview{flex:1}
+.meta-icons,.history-dots{display:flex;gap:4px;margin-left:8px;color:var(--dim);font-size:11px}
+.history-dot{width:8px;height:8px;border-radius:50%}
+.history-dot.correct{background:var(--correct)}.history-dot.wrong{background:var(--wrong)}
+.modal-overlay{position:fixed;inset:0;background:#0009;z-index:100;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0}
 .modal-overlay.active{visibility:visible;opacity:1}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:480px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:480px;max-height:80vh;overflow-y:auto}
 .modal h2{font-size:17px;margin-bottom:16px}
-.empty-state{text-align:center;padding:40px 20px;color:var(--text-dim)}
-.empty-state p{margin-bottom:16px}
-.text-dim{color:var(--text-dim)}
-.text-sm{font-size:12px}
-.mt-8{margin-top:8px}
-.mb-8{margin-bottom:8px}
-.mb-16{margin-bottom:16px}
-.flex-between{display:flex;align-items:center;justify-content:space-between}
+.empty-state{text-align:center;padding:40px 20px;color:var(--dim)}
 .select-bar{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
-.select-bar span{font-size:13px;flex:1}
+.select-bar span{flex:1;font-size:13px}
+.mt-8{margin-top:8px}.mb-8{margin-bottom:8px}.mb-16{margin-bottom:16px}
+.result-review{text-align:left}
+.result-review-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.result-review-item{padding:14px;border:1px solid var(--border);border-left:4px solid var(--border);border-radius:10px;background:var(--surface2)}
+.result-review-item.correct{border-left-color:var(--correct)}
+.result-review-item.wrong{border-left-color:var(--wrong)}
+.result-review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.result-review-number,.result-review-label{font-size:11px;color:var(--dim)}
+.result-review-status{padding:4px 8px;border-radius:20px;color:#fff;font-size:12px}
+.result-review-status.correct{background:var(--correct)}
+.result-review-status.wrong{background:var(--wrong)}
+.result-review-row{margin-top:10px}
+.result-review-text{font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.result-review-note{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.result-review-media{margin-top:8px}
+.result-review-media img{max-width:100%;max-height:180px;border-radius:8px}
+.result-review-media audio{width:100%}
+@media(max-width:420px){.app{padding:10px}.panel{padding:16px}.header .btn-sm{padding:6px 8px}.history-dots{display:none}}
 </style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="app">
 
-  <!-- デッキ一覧 -->
-  <div class="view active" id="view-decks">
-    <div class="header">
-      <h1>暗記カード</h1>
-      <div class="header-actions">
-        <button class="btn btn-primary btn-sm" id="btn-show-create-deck">+ デッキ作成</button>
-      </div>
-    </div>
-    <div id="deck-list"></div>
+<div class="view active" id="view-decks">
+  <div class="header">
+    <h1>暗記カード</h1>
+    <button class="btn btn-primary btn-sm" id="btn-show-create-deck">+ デッキ作成</button>
   </div>
-
-  <!-- デッキ詳細 -->
-  <div class="view" id="view-deck-detail">
-    <div class="header">
-      <button class="btn btn-sm btn-icon" id="btn-back-to-decks">&larr;</button>
-      <h1 id="deck-detail-title"></h1>
-      <div class="header-actions">
-        <button class="btn btn-sm" id="btn-show-import">読込</button>
-        <button class="btn btn-sm btn-primary" id="btn-show-add-card">+ カード</button>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="form-group">
-        <label>出題数</label>
-        <input type="number" id="session-count" value="10" min="1" max="999">
-      </div>
-      <div class="toggle-row"><span>ランダム（忘却曲線）</span><div class="switch" id="toggle-random"></div></div>
-      <div class="toggle-row"><span>表裏反転モード</span><div class="switch" id="toggle-reverse"></div></div>
-      <button class="btn btn-primary btn-block mt-8" id="btn-start-session">学習を開始する</button>
-    </div>
-    <div class="flex-between mb-8">
-      <span class="text-sm text-dim" id="card-count-label">カード: 0枚</span>
-      <div class="header-actions">
-        <button class="btn btn-sm" id="btn-toggle-select">選択</button>
-        <button class="btn btn-sm" id="btn-export">エクスポート</button>
-      </div>
-    </div>
-    <div class="select-bar" id="select-bar" style="display:none;">
-      <span id="sel-count">0件選択</span>
-      <button class="btn btn-sm" id="btn-move-cards">移動</button>
-      <button class="btn btn-sm btn-wrong" id="btn-delete-selected">削除</button>
-      <button class="btn btn-sm" id="btn-cancel-select">取消</button>
-    </div>
-    <div id="card-list"></div>
-  </div>
-
-  <!-- カード追加/編集 -->
-  <div class="view" id="view-add-card">
-    <div class="header">
-      <button class="btn btn-sm btn-icon" id="btn-cancel-add-card">&larr;</button>
-      <h1 id="add-card-title">カード追加</h1>
-      <div></div>
-    </div>
-    <div class="panel">
-      <h3 class="mb-8">表面（問題）</h3>
-      <div class="form-group"><label>テキスト</label><textarea id="card-front-text" placeholder="問題文を入力"></textarea></div>
-      <div class="form-group"><label>画像</label><input type="file" id="card-front-image" accept="image/*"><div id="card-front-image-preview" class="mt-8"></div></div>
-      <div class="form-group"><label>音声</label><input type="file" id="card-front-audio" accept="audio/*"><div id="card-front-audio-preview" class="mt-8"></div></div>
-    </div>
-    <div class="panel">
-      <h3 class="mb-8">裏面（解答）</h3>
-      <div class="form-group"><label>テキスト</label><textarea id="card-back-text" placeholder="解答を入力"></textarea></div>
-      <div class="form-group"><label>画像</label><input type="file" id="card-back-image" accept="image/*"><div id="card-back-image-preview" class="mt-8"></div></div>
-      <div class="form-group"><label>音声</label><input type="file" id="card-back-audio" accept="audio/*"><div id="card-back-audio-preview" class="mt-8"></div></div>
-    </div>
-    <div class="panel">
-      <h3 class="mb-8">メモ（詳細説明）</h3>
-      <div class="form-group"><label>解答表示時に併せて表示されます</label><textarea id="card-note" placeholder="補足説明、例文、語源など" style="min-height:80px"></textarea></div>
-    </div>
-    <button class="btn btn-primary btn-block" id="btn-save-card">保存</button>
-  </div>
-
-  <!-- 学習セッション -->
-  <div class="view" id="view-session">
-    <div class="header">
-      <button class="btn btn-sm btn-icon" id="btn-end-session">&times;</button>
-      <span id="session-progress-text">1 / 10</span>
-      <div></div>
-    </div>
-    <div class="progress-bar"><div class="progress-bar-fill" id="session-progress-bar"></div></div>
-    <div class="session-nav">
-      <button class="btn btn-sm" id="btn-prev-card" disabled>&larr; 前へ</button>
-    </div>
-    <div class="flashcard-container">
-      <div class="flashcard" id="flashcard">
-        <div class="flashcard-face flashcard-front" id="fc-front">
-          <span class="flashcard-label">問題</span>
-          <div id="fc-front-content"></div>
-        </div>
-        <div class="flashcard-face flashcard-back" id="fc-back">
-          <span class="flashcard-label">解答</span>
-          <div id="fc-back-content"></div>
-        </div>
-      </div>
-    </div>
-    <div class="answer-buttons" id="answer-buttons" style="display:none;">
-      <button class="btn btn-wrong" id="btn-answer-wrong">不正解</button>
-      <button class="btn btn-correct" id="btn-answer-correct">正解</button>
-    </div>
-    <p class="text-sm text-dim mt-8" id="tap-hint" style="text-align:center;">カードをタップして解答を表示</p>
-  </div>
-
-  <!-- 結果 -->
-  <div class="view" id="view-result">
-    <div class="panel session-result">
-      <h2>セッション完了</h2>
-      <div class="result-stats">
-        <div class="result-stat"><div class="num" style="color:var(--correct)" id="result-correct">0</div><div class="label">正解</div></div>
-        <div class="result-stat"><div class="num" style="color:var(--wrong)" id="result-wrong">0</div><div class="label">不正解</div></div>
-      </div>
-      <div class="text-sm text-dim mb-16" id="result-accuracy"></div>
-      <button class="btn btn-primary btn-block mb-8" id="btn-retry">もう一度</button>
-      <button class="btn btn-block" id="btn-back-to-deck">デッキに戻る</button>
-    </div>
-  </div>
+  <div id="deck-list"></div>
 </div>
 
-<!-- モーダル: デッキ作成 -->
-<div class="modal-overlay" id="modal-create-deck">
-  <div class="modal">
-    <h2>新しいデッキ</h2>
-    <div class="form-group"><label>デッキ名</label><input type="text" id="new-deck-name" placeholder="例: 英単語TOEIC"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-sm" id="btn-cancel-create-deck">取消</button>
-      <button class="btn btn-sm btn-primary" id="btn-confirm-create-deck">作成</button>
+<div class="view" id="view-deck-detail">
+  <div class="header">
+    <button class="btn btn-sm btn-icon" id="btn-back-to-decks">&larr;</button>
+    <h1 id="deck-detail-title"></h1>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btn-show-import">読込</button>
+      <button class="btn btn-sm btn-primary" id="btn-show-add-card">+ カード</button>
     </div>
   </div>
-</div>
-
-<!-- モーダル: インポート -->
-<div class="modal-overlay" id="modal-import">
-  <div class="modal">
-    <h2>ファイル読み込み</h2>
-    <p class="text-sm text-dim mb-16">TSV/CSV/JSON対応。ファイル選択またはテキスト貼り付け。</p>
+  <div class="panel">
     <div class="form-group">
-      <label>区切り文字（テキスト貼り付け・TSV/CSV時）</label>
-      <select id="import-delimiter"><option value="tab">タブ (TSV)</option><option value="comma">カンマ (CSV)</option></select>
+      <label>出題数</label>
+      <input type="number" id="session-count" value="10" min="1" max="999">
     </div>
-    <div class="form-group">
-      <div class="file-drop" id="import-drop">ファイルをドロップまたはクリックして選択</div>
-      <input type="file" id="import-file" accept=".tsv,.csv,.txt,.json" style="display:none">
-    </div>
-    <div class="form-group">
-      <label>または、テキストを直接貼り付け</label>
-      <textarea id="import-paste" placeholder="ここにTSV/CSV/JSONテキストを貼り付け" style="min-height:120px"></textarea>
-    </div>
-    <div id="import-preview" class="text-sm mb-8"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-sm" id="btn-cancel-import">取消</button>
-      <button class="btn btn-sm btn-primary" id="btn-confirm-import" disabled>読み込む</button>
+    <div class="toggle-row"><span>ランダム（忘却曲線）</span><div class="switch" id="toggle-random"></div></div>
+    <div class="toggle-row"><span>表裏反転モード</span><div class="switch" id="toggle-reverse"></div></div>
+    <button class="btn btn-primary btn-block mt-8" id="btn-start-session">学習を開始する</button>
+  </div>
+  <div class="flex-between mb-8">
+    <span class="text-sm text-dim" id="card-count-label"></span>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btn-toggle-select">選択</button>
+      <button class="btn btn-sm" id="btn-export">エクスポート</button>
     </div>
   </div>
+  <div class="select-bar" id="select-bar" style="display:none">
+    <span id="sel-count">0件選択</span>
+    <button class="btn btn-sm" id="btn-move-cards">移動</button>
+    <button class="btn btn-sm btn-wrong" id="btn-delete-selected">削除</button>
+    <button class="btn btn-sm" id="btn-cancel-select">取消</button>
+  </div>
+  <div id="card-list"></div>
 </div>
 
-<!-- モーダル: デッキ移動 -->
-<div class="modal-overlay" id="modal-move">
-  <div class="modal">
-    <h2>カードを移動</h2>
-    <div class="form-group"><label>移動先デッキ</label><select id="move-target-deck"></select></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-sm" id="btn-cancel-move">取消</button>
-      <button class="btn btn-sm btn-primary" id="btn-confirm-move">移動</button>
-    </div>
+<div class="view" id="view-add-card">
+  <div class="header">
+    <button class="btn btn-sm btn-icon" id="btn-cancel-add-card">&larr;</button>
+    <h1 id="add-card-title">カード追加</h1><div></div>
   </div>
+  <div class="panel">
+    <h3 class="mb-8">表面（問題）</h3>
+    <div class="form-group"><label>テキスト</label><textarea id="card-front-text"></textarea></div>
+    <div class="form-group"><label>画像</label><input type="file" id="card-front-image" accept="image/*"><div id="card-front-image-preview" class="mt-8"></div></div>
+    <div class="form-group"><label>音声</label><input type="file" id="card-front-audio" accept="audio/*"><div id="card-front-audio-preview" class="mt-8"></div></div>
+  </div>
+  <div class="panel">
+    <h3 class="mb-8">裏面（解答）</h3>
+    <div class="form-group"><label>テキスト</label><textarea id="card-back-text"></textarea></div>
+    <div class="form-group"><label>画像</label><input type="file" id="card-back-image" accept="image/*"><div id="card-back-image-preview" class="mt-8"></div></div>
+    <div class="form-group"><label>音声</label><input type="file" id="card-back-audio" accept="audio/*"><div id="card-back-audio-preview" class="mt-8"></div></div>
+  </div>
+  <div class="panel">
+    <h3 class="mb-8">メモ</h3>
+    <textarea id="card-note" style="min-height:80px"></textarea>
+  </div>
+  <button class="btn btn-primary btn-block" id="btn-save-card">保存</button>
 </div>
 
-<!-- モーダル: 確認 -->
-<div class="modal-overlay" id="modal-confirm">
-  <div class="modal">
-    <p id="confirm-message"></p>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-sm" id="btn-cancel-confirm">取消</button>
-      <button class="btn btn-sm btn-wrong" id="btn-ok-confirm">実行</button>
+<div class="view" id="view-session">
+  <div class="header">
+    <button class="btn btn-sm btn-icon" id="btn-end-session">&times;</button>
+    <span id="session-progress-text"></span><div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="session-progress-bar"></div></div>
+  <div class="session-nav"><button class="btn btn-sm" id="btn-prev-card" disabled>&larr; 前へ</button></div>
+  <div class="flashcard-container">
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-face"><span class="flashcard-label">問題</span><div id="fc-front-content"></div></div>
+      <div class="flashcard-face flashcard-back"><span class="flashcard-label">解答</span><div id="fc-back-content"></div></div>
     </div>
   </div>
+  <div class="answer-buttons" id="answer-buttons" style="display:none">
+    <button class="btn btn-wrong" id="btn-answer-wrong">不正解</button>
+    <button class="btn btn-correct" id="btn-answer-correct">正解</button>
+  </div>
+  <p class="text-sm text-dim mt-8" id="tap-hint" style="text-align:center">カードをタップして解答を表示</p>
 </div>
+
+<div class="view" id="view-result">
+  <div class="panel session-result">
+    <h2>セッション完了</h2>
+    <div class="result-stats">
+      <div class="result-stat"><div class="num" style="color:var(--correct)" id="result-correct">0</div><div class="label">正解</div></div>
+      <div class="result-stat"><div class="num" style="color:var(--wrong)" id="result-wrong">0</div><div class="label">不正解</div></div>
+    </div>
+    <div class="text-sm text-dim mb-16" id="result-accuracy"></div>
+    <button class="btn btn-primary btn-block mb-8" id="btn-retry">もう一度</button>
+    <button class="btn btn-block" id="btn-back-to-deck">デッキに戻る</button>
+  </div>
+  <div class="panel result-review">
+    <h3>今回回答した問題</h3>
+    <div id="result-review-list" class="result-review-list"></div>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-create-deck"><div class="modal">
+  <h2>新しいデッキ</h2>
+  <div class="form-group"><label>デッキ名</label><input type="text" id="new-deck-name"></div>
+  <div class="flex-between"><span></span><div class="header-actions"><button class="btn btn-sm" id="btn-cancel-create-deck">取消</button><button class="btn btn-sm btn-primary" id="btn-confirm-create-deck">作成</button></div></div>
+</div></div>
+
+<div class="modal-overlay" id="modal-import"><div class="modal">
+  <h2>ファイル読み込み</h2>
+  <p class="text-sm text-dim mb-16">TSV、CSV、JSONに対応しています。</p>
+  <div class="form-group"><label>区切り文字</label><select id="import-delimiter"><option value="tab">タブ</option><option value="comma">カンマ</option></select></div>
+  <div class="file-drop" id="import-drop">ファイルをドロップまたはクリック</div>
+  <input type="file" id="import-file" accept=".tsv,.csv,.txt,.json" style="display:none">
+  <div class="form-group mt-8"><label>または直接貼り付け</label><textarea id="import-paste" style="min-height:120px"></textarea></div>
+  <div id="import-preview" class="text-sm mb-8"></div>
+  <div class="flex-between"><span></span><div class="header-actions"><button class="btn btn-sm" id="btn-cancel-import">取消</button><button class="btn btn-sm btn-primary" id="btn-confirm-import" disabled>読み込む</button></div></div>
+</div></div>
+
+<div class="modal-overlay" id="modal-move"><div class="modal">
+  <h2>カードを移動</h2>
+  <div class="form-group"><label>移動先</label><select id="move-target-deck"></select></div>
+  <div class="flex-between"><span></span><div class="header-actions"><button class="btn btn-sm" id="btn-cancel-move">取消</button><button class="btn btn-sm btn-primary" id="btn-confirm-move">移動</button></div></div>
+</div></div>
+
+<div class="modal-overlay" id="modal-confirm"><div class="modal">
+  <p id="confirm-message"></p>
+  <div class="flex-between mt-8"><span></span><div class="header-actions"><button class="btn btn-sm" id="btn-cancel-confirm">取消</button><button class="btn btn-sm btn-wrong" id="btn-ok-confirm">実行</button></div></div>
+</div></div>
 
 <script>
 (function(){
 "use strict";
 
+/* ===== データベース ===== */
+
 var DB_NAME="AnkiAppDB";
 var DB_VERSION=5;
 var db=null;
 
-/* ===== IndexedDB ===== */
 function openDB(){
   return new Promise(function(resolve,reject){
-    var req=indexedDB.open(DB_NAME,DB_VERSION);
-    req.onupgradeneeded=function(e){
-      var d=e.target.result;
-      if(!d.objectStoreNames.contains("decks")){d.createObjectStore("decks",{keyPath:"id"});}
-      if(!d.objectStoreNames.contains("cards")){
-        var s=d.createObjectStore("cards",{keyPath:"id"});
-        s.createIndex("deckId","deckId",{unique:false});
+    var request=indexedDB.open(DB_NAME,DB_VERSION);
+
+    request.onupgradeneeded=function(event){
+      var database=event.target.result;
+
+      if(!database.objectStoreNames.contains("decks")){
+        database.createObjectStore("decks",{keyPath:"id"});
+      }
+
+      if(!database.objectStoreNames.contains("cards")){
+        var store=database.createObjectStore("cards",{keyPath:"id"});
+        store.createIndex("deckId","deckId",{unique:false});
       }
     };
-    req.onsuccess=function(e){db=e.target.result;resolve(db);};
-    req.onerror=function(e){reject(e.target.error);};
+
+    request.onsuccess=function(event){
+      db=event.target.result;
+      resolve(db);
+    };
+
+    request.onerror=function(event){
+      reject(event.target.error);
+    };
   });
 }
-function dbPut(store,data){return new Promise(function(ok,ng){var t=db.transaction(store,"readwrite");t.objectStore(store).put(data);t.oncomplete=function(){ok();};t.onerror=function(e){ng(e.target.error);};});}
-function dbGet(store,id){return new Promise(function(ok,ng){var t=db.transaction(store,"readonly");var r=t.objectStore(store).get(id);r.onsuccess=function(){ok(r.result);};r.onerror=function(e){ng(e.target.error);};});}
-function dbGetAll(store){return new Promise(function(ok,ng){var t=db.transaction(store,"readonly");var r=t.objectStore(store).getAll();r.onsuccess=function(){ok(r.result);};r.onerror=function(e){ng(e.target.error);};});}
-function dbDelete(store,id){return new Promise(function(ok,ng){var t=db.transaction(store,"readwrite");t.objectStore(store).delete(id);t.oncomplete=function(){ok();};t.onerror=function(e){ng(e.target.error);};});}
-function dbGetByIndex(store,indexName,value){return new Promise(function(ok,ng){var t=db.transaction(store,"readonly");var r=t.objectStore(store).index(indexName).getAll(value);r.onsuccess=function(){ok(r.result);};r.onerror=function(e){ng(e.target.error);};});}
 
-/* ===== ユーティリティ ===== */
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
-function G(id){return document.getElementById(id);}
-function esc(s){if(!s)return "";var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
-function csvEscape(s){if(!s)return "";if(s.indexOf(",")!==-1||s.indexOf('"')!==-1||s.indexOf("\n")!==-1){return '"'+s.replace(/"/g,'""')+'"';}return s;}
+function dbPut(storeName,data){
+  return new Promise(function(resolve,reject){
+    var transaction=db.transaction(storeName,"readwrite");
+    transaction.objectStore(storeName).put(data);
+
+    transaction.oncomplete=function(){
+      resolve();
+    };
+
+    transaction.onerror=function(event){
+      reject(event.target.error);
+    };
+  });
+}
+
+function dbGet(storeName,id){
+  return new Promise(function(resolve,reject){
+    var transaction=db.transaction(storeName,"readonly");
+    var request=transaction.objectStore(storeName).get(id);
+
+    request.onsuccess=function(){
+      resolve(request.result);
+    };
+
+    request.onerror=function(event){
+      reject(event.target.error);
+    };
+  });
+}
+
+function dbGetAll(storeName){
+  return new Promise(function(resolve,reject){
+    var transaction=db.transaction(storeName,"readonly");
+    var request=transaction.objectStore(storeName).getAll();
+
+    request.onsuccess=function(){
+      resolve(request.result);
+    };
+
+    request.onerror=function(event){
+      reject(event.target.error);
+    };
+  });
+}
+
+function dbDelete(storeName,id){
+  return new Promise(function(resolve,reject){
+    var transaction=db.transaction(storeName,"readwrite");
+    transaction.objectStore(storeName).delete(id);
+
+    transaction.oncomplete=function(){
+      resolve();
+    };
+
+    transaction.onerror=function(event){
+      reject(event.target.error);
+    };
+  });
+}
+
+function dbGetByIndex(storeName,indexName,value){
+  return new Promise(function(resolve,reject){
+    var transaction=db.transaction(storeName,"readonly");
+    var request=transaction
+      .objectStore(storeName)
+      .index(indexName)
+      .getAll(value);
+
+    request.onsuccess=function(){
+      resolve(request.result);
+    };
+
+    request.onerror=function(event){
+      reject(event.target.error);
+    };
+  });
+}
+
+/* ===== 共通処理 ===== */
+
+function G(id){
+  return document.getElementById(id);
+}
+
+function uid(){
+  return Date.now().toString(36)+
+    Math.random().toString(36).slice(2,8);
+}
+
+function esc(value){
+  if(value===null||value===undefined)return "";
+
+  var element=document.createElement("div");
+  element.textContent=String(value);
+  return element.innerHTML;
+}
+
+function csvEscape(value){
+  var text=value===null||value===undefined?"":String(value);
+
+  if(
+    text.indexOf(",")!==-1||
+    text.indexOf('"')!==-1||
+    text.indexOf("\n")!==-1||
+    text.indexOf("\r")!==-1
+  ){
+    return '"'+text.replace(/"/g,'""')+'"';
+  }
+
+  return text;
+}
 
 function showView(id){
   var views=document.querySelectorAll(".view");
-  for(var i=0;i<views.length;i++){views[i].classList.remove("active");}
+
+  for(var i=0;i<views.length;i++){
+    views[i].classList.remove("active");
+  }
+
+  G(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function showModal(id){
   G(id).classList.add("active");
 }
-function showModal(id){G(id).classList.add("active");}
-function closeModal(id){G(id).classList.remove("active");}
 
-/* ===== 状態変数 ===== */
+function closeModal(id){
+  G(id).classList.remove("active");
+}
+
+function showConfirm(message,callback){
+  G("confirm-message").textContent=message;
+  confirmCallback=callback;
+  showModal("modal-confirm");
+}
+
+function shuffleArray(items){
+  var result=items.slice();
+
+  for(var i=result.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var temporary=result[i];
+    result[i]=result[j];
+    result[j]=temporary;
+  }
+
+  return result;
+}
+
+/* ===== 状態 ===== */
+
 var currentDeckId=null;
 var editingCardId=null;
+
 var sessionCards=[];
 var sessionIndex=0;
 var sessionCorrect=0;
 var sessionWrong=0;
 var sessionAnswered=[];
+var sessionReverse=false;
 var isFlipped=false;
+var answerLocked=false;
+
 var importData=null;
 var importSourceFileName=null;
 var importSourceFormat=null;
+
 var confirmCallback=null;
 var selectMode=false;
 var selectedIds={};
+
 var tempFrontImage=null;
 var tempFrontAudio=null;
 var tempBackImage=null;
 var tempBackAudio=null;
 
-/* ===== Blob/DataURI変換 ===== */
+var resultObjectUrls=[];
+
+/* ===== カードデータの補完 ===== */
+
+function normalizeCardSide(side){
+  side=side||{};
+
+  return {
+    text:side.text||"",
+    imageBlob:side.imageBlob||null,
+    audioBlob:side.audioBlob||null
+  };
+}
+
+function normalizeReviewData(card){
+  if(typeof card.easeFactor!=="number")card.easeFactor=2.5;
+  if(typeof card.interval!=="number")card.interval=0;
+  if(typeof card.repetitions!=="number")card.repetitions=0;
+  if(typeof card.nextReview!=="number")card.nextReview=0;
+  if(typeof card.mistakeStreak!=="number")card.mistakeStreak=0;
+  if(typeof card.lastReviewed!=="number")card.lastReviewed=0;
+  if(!Array.isArray(card.history))card.history=[];
+
+  card.front=normalizeCardSide(card.front);
+  card.back=normalizeCardSide(card.back);
+
+  if(typeof card.note!=="string")card.note="";
+
+  return card;
+}
+
+function createNewCard(deckId){
+  return {
+    id:uid(),
+    deckId:deckId,
+    front:{
+      text:"",
+      imageBlob:null,
+      audioBlob:null
+    },
+    back:{
+      text:"",
+      imageBlob:null,
+      audioBlob:null
+    },
+    note:"",
+    easeFactor:2.5,
+    interval:0,
+    repetitions:0,
+    nextReview:0,
+    mistakeStreak:0,
+    lastReviewed:0,
+    history:[],
+    createdAt:Date.now()
+  };
+}
+
+/* ===== Blob変換 ===== */
+
 function blobToDataURI(blob){
-  return new Promise(function(ok){
-    if(!blob){ok(null);return;}
-    var r=new FileReader();
-    r.onload=function(){ok(r.result);};
-    r.readAsDataURL(blob);
+  return new Promise(function(resolve,reject){
+    if(!blob){
+      resolve(null);
+      return;
+    }
+
+    var reader=new FileReader();
+
+    reader.onload=function(){
+      resolve(reader.result);
+    };
+
+    reader.onerror=function(){
+      reject(reader.error);
+    };
+
+    reader.readAsDataURL(blob);
   });
 }
+
 function dataURItoBlob(uri){
   if(!uri)return null;
+
   try{
     var parts=uri.split(",");
-    var mime=parts[0].match(/:(.*?);/)[1];
-    var b=atob(parts[1]);
-    var arr=new Uint8Array(b.length);
-    for(var i=0;i<b.length;i++){arr[i]=b.charCodeAt(i);}
-    return new Blob([arr],{type:mime});
-  }catch(e){return null;}
+    var mimeMatch=parts[0].match(/:(.*?);/);
+
+    if(!mimeMatch)return null;
+
+    var binary=atob(parts[1]);
+    var bytes=new Uint8Array(binary.length);
+
+    for(var i=0;i<binary.length;i++){
+      bytes[i]=binary.charCodeAt(i);
+    }
+
+    return new Blob(
+      [bytes],
+      {type:mimeMatch[1]}
+    );
+  }catch(error){
+    return null;
+  }
 }
+
 function fileToBlob(file){
-  return new Promise(function(ok){
-    if(!file){ok(null);return;}
-    var r=new FileReader();
-    r.onload=function(){ok(new Blob([r.result],{type:file.type}));};
-    r.readAsArrayBuffer(file);
+  return new Promise(function(resolve,reject){
+    if(!file){
+      resolve(null);
+      return;
+    }
+
+    var reader=new FileReader();
+
+    reader.onload=function(){
+      resolve(
+        new Blob(
+          [reader.result],
+          {type:file.type}
+        )
+      );
+    };
+
+    reader.onerror=function(){
+      reject(reader.error);
+    };
+
+    reader.readAsArrayBuffer(file);
   });
 }
 
 /* ===== デッキ一覧 ===== */
+
 function renderDeckList(){
   dbGetAll("decks").then(function(decks){
     if(decks.length===0){
-      G("deck-list").innerHTML='<div class="empty-state"><p>デッキがありません</p><p class="text-sm text-dim">「+ デッキ作成」で始めましょう</p></div>';
+      G("deck-list").innerHTML=
+        '<div class="empty-state">'+
+          '<p>デッキがありません</p>'+
+          '<p class="text-sm">「+ デッキ作成」で始めましょう</p>'+
+        '</div>';
       return;
     }
-    var promises=[];
-    for(var i=0;i<decks.length;i++){
-      (function(deck){
-        promises.push(dbGetByIndex("cards","deckId",deck.id).then(function(cards){return {deck:deck,count:cards.length};}));
-      })(decks[i]);
-    }
-    Promise.all(promises).then(function(results){
-      var html="";
-      for(var j=0;j<results.length;j++){
-        var r=results[j];
-        html+='<div class="deck-item" data-id="'+esc(r.deck.id)+'">';
-        html+='<div class="deck-item-info"><h3>'+esc(r.deck.name)+'</h3><span>'+r.count+'枚</span></div>';
-        html+='<div class="deck-actions"><button class="btn btn-sm btn-icon deck-delete-btn" data-id="'+esc(r.deck.id)+'">&times;</button></div>';
-        html+='</div>';
-      }
-      G("deck-list").innerHTML=html;
-      var items=document.querySelectorAll(".deck-item");
-      for(var k=0;k<items.length;k++){
-        items[k].addEventListener("click",function(e){
-          if(e.target.classList.contains("deck-delete-btn"))return;
-          currentDeckId=this.dataset.id;
-          showDeckDetail(currentDeckId);
-        });
-      }
-      var delBtns=document.querySelectorAll(".deck-delete-btn");
-      for(var m=0;m<delBtns.length;m++){
-        delBtns[m].addEventListener("click",function(e){
-          e.stopPropagation();
-          var did=this.dataset.id;
-          showConfirm("このデッキとカードをすべて削除しますか？",function(){
-            dbGetByIndex("cards","deckId",did).then(function(cards){
-              var p=Promise.resolve();
-              for(var c=0;c<cards.length;c++){
-                (function(cid){p=p.then(function(){return dbDelete("cards",cid);});})(cards[c].id);
-              }
-              return p;
-            }).then(function(){return dbDelete("decks",did);}).then(function(){renderDeckList();});
-          });
-        });
-      }
+
+    decks.sort(function(a,b){
+      return (a.createdAt||0)-(b.createdAt||0);
     });
+
+    var promises=decks.map(function(deck){
+      return dbGetByIndex("cards","deckId",deck.id)
+        .then(function(cards){
+          return {
+            deck:deck,
+            count:cards.length
+          };
+        });
+    });
+
+    return Promise.all(promises);
+  }).then(function(results){
+    if(!results)return;
+
+    var html="";
+
+    results.forEach(function(result){
+      html+=
+        '<div class="deck-item" data-id="'+esc(result.deck.id)+'">'+
+          '<div class="deck-item-info">'+
+            '<h3>'+esc(result.deck.name)+'</h3>'+
+            '<span>'+result.count+'枚</span>'+
+          '</div>'+
+          '<div class="deck-actions">'+
+            '<button class="btn btn-sm btn-icon deck-delete-btn" '+
+              'data-id="'+esc(result.deck.id)+'">'+
+              '&times;'+
+            '</button>'+
+          '</div>'+
+        '</div>';
+    });
+
+    G("deck-list").innerHTML=html;
+
+    document.querySelectorAll(".deck-item").forEach(function(item){
+      item.addEventListener("click",function(event){
+        if(event.target.closest(".deck-delete-btn"))return;
+
+        currentDeckId=this.dataset.id;
+        showDeckDetail(currentDeckId);
+      });
+    });
+
+    document.querySelectorAll(".deck-delete-btn").forEach(function(button){
+      button.addEventListener("click",function(event){
+        event.stopPropagation();
+
+        var deckId=this.dataset.id;
+
+        showConfirm(
+          "このデッキとカードをすべて削除しますか？",
+          function(){
+            dbGetByIndex("cards","deckId",deckId)
+              .then(function(cards){
+                return Promise.all(
+                  cards.map(function(card){
+                    return dbDelete("cards",card.id);
+                  })
+                );
+              })
+              .then(function(){
+                return dbDelete("decks",deckId);
+              })
+              .then(renderDeckList);
+          }
+        );
+      });
+    });
+  }).catch(function(error){
+    console.error(error);
   });
 }
 
 function createDeck(){
-  var n=G("new-deck-name").value.trim();
-  if(!n)return;
-  dbPut("decks",{id:uid(),name:n,createdAt:Date.now(),sourceFileName:null,sourceFormat:null,seqOffset:0}).then(function(){
+  var name=G("new-deck-name").value.trim();
+
+  if(!name)return;
+
+  dbPut("decks",{
+    id:uid(),
+    name:name,
+    createdAt:Date.now(),
+    sourceFileName:null,
+    sourceFormat:null,
+    seqOffset:0
+  }).then(function(){
     closeModal("modal-create-deck");
     renderDeckList();
+  }).catch(function(error){
+    console.error(error);
   });
 }
 
-/* ===== 確認モーダル ===== */
-function showConfirm(msg,cb){
-  G("confirm-message").textContent=msg;
-  confirmCallback=cb;
-  showModal("modal-confirm");
-}
+/* ===== デッキ詳細・カード一覧 ===== */
 
-/* ===== デッキ詳細 ===== */
 function showDeckDetail(deckId){
   currentDeckId=deckId;
   selectMode=false;
   selectedIds={};
+
   G("select-bar").style.display="none";
   G("btn-toggle-select").textContent="選択";
+
   dbGet("decks",deckId).then(function(deck){
     if(!deck)return;
+
     G("deck-detail-title").textContent=deck.name;
     showView("view-deck-detail");
     renderCardList();
+  }).catch(function(error){
+    console.error(error);
   });
 }
 
 function renderCardList(){
-  dbGetByIndex("cards","deckId",currentDeckId).then(function(cards){
-    G("card-count-label").textContent="カード: "+cards.length+"枚";
-    if(cards.length===0){
-      G("card-list").innerHTML='<div class="empty-state"><p>カードがありません</p></div>';
-      return;
-    }
-    cards.sort(function(a,b){return(a.createdAt||0)-(b.createdAt||0);});
-    var html="";
-    for(var i=0;i<cards.length;i++){
-      var c=cards[i];
-      var sel=selectedIds[c.id]?" selected":"";
-      var frontText=c.front&&c.front.text?c.front.text:"(メディアのみ)";
-      var icons="";
-      if(c.front&&c.front.imageBlob)icons+="[画]";
-      if(c.front&&c.front.audioBlob)icons+="[音]";
-      var histHtml="";
-      if(c.history&&c.history.length>0){
-        var start=Math.max(0,c.history.length-5);
-        for(var h=start;h<c.history.length;h++){
-          histHtml+='<span class="history-dot '+(c.history[h]?"correct":"wrong")+'"></span>';
+  dbGetByIndex("cards","deckId",currentDeckId)
+    .then(function(cards){
+      G("card-count-label").textContent=
+        "カード: "+cards.length+"枚";
+
+      if(cards.length===0){
+        G("card-list").innerHTML=
+          '<div class="empty-state">'+
+            '<p>カードがありません</p>'+
+          '</div>';
+        return;
+      }
+
+      cards.sort(function(a,b){
+        return (a.createdAt||0)-(b.createdAt||0);
+      });
+
+      var html="";
+
+      cards.forEach(function(rawCard){
+        var card=normalizeReviewData(rawCard);
+        var selectedClass=
+          selectedIds[card.id]?" selected":"";
+
+        var frontText=
+          card.front.text||"（メディアのみ）";
+
+        var mediaIcons="";
+
+        if(card.front.imageBlob)mediaIcons+="[画]";
+        if(card.front.audioBlob)mediaIcons+="[音]";
+
+        var historyHtml="";
+        var start=Math.max(0,card.history.length-5);
+
+        for(var i=start;i<card.history.length;i++){
+          historyHtml+=
+            '<span class="history-dot '+
+              (card.history[i]?"correct":"wrong")+
+            '"></span>';
         }
-      }
-      html+='<div class="card-list-item'+sel+'" data-id="'+esc(c.id)+'">';
-      html+='<span class="front-preview">'+esc(frontText)+'</span>';
-      if(icons)html+='<span class="meta-icons">'+icons+'</span>';
-      if(histHtml)html+='<span class="history-dots">'+histHtml+'</span>';
-      html+='<div class="card-actions">';
-      html+='<button class="btn btn-sm btn-icon card-edit-btn" data-id="'+esc(c.id)+'">&#9998;</button>';
-      html+='<button class="btn btn-sm btn-icon card-del-btn" data-id="'+esc(c.id)+'">&times;</button>';
-      html+='</div></div>';
-    }
-    G("card-list").innerHTML=html;
-    var editBtns=document.querySelectorAll(".card-edit-btn");
-    for(var e=0;e<editBtns.length;e++){
-      editBtns[e].addEventListener("click",function(ev){
-        ev.stopPropagation();
-        editCard(this.dataset.id);
+
+        html+=
+          '<div class="card-list-item'+selectedClass+'" '+
+            'data-id="'+esc(card.id)+'">'+
+            '<span class="front-preview">'+esc(frontText)+'</span>'+
+            (mediaIcons
+              ?'<span class="meta-icons">'+mediaIcons+'</span>'
+              :"")+
+            (historyHtml
+              ?'<span class="history-dots">'+historyHtml+'</span>'
+              :"")+
+            '<div class="card-actions">'+
+              '<button class="btn btn-sm btn-icon card-edit-btn" '+
+                'data-id="'+esc(card.id)+'">&#9998;</button>'+
+              '<button class="btn btn-sm btn-icon card-del-btn" '+
+                'data-id="'+esc(card.id)+'">&times;</button>'+
+            '</div>'+
+          '</div>';
       });
-    }
-    var delBtns=document.querySelectorAll(".card-del-btn");
-    for(var d=0;d<delBtns.length;d++){
-      delBtns[d].addEventListener("click",function(ev){
-        ev.stopPropagation();
-        var cid=this.dataset.id;
-        showConfirm("このカードを削除しますか？",function(){
-          dbDelete("cards",cid).then(function(){renderCardList();});
+
+      G("card-list").innerHTML=html;
+
+      document.querySelectorAll(".card-edit-btn").forEach(function(button){
+        button.addEventListener("click",function(event){
+          event.stopPropagation();
+          editCard(this.dataset.id);
         });
       });
-    }
-    if(selectMode){
-      var listItems=document.querySelectorAll(".card-list-item");
-      for(var s=0;s<listItems.length;s++){
-        listItems[s].addEventListener("click",function(){
-          var cid=this.dataset.id;
-          if(selectedIds[cid]){delete selectedIds[cid];this.classList.remove("selected");}
-          else{selectedIds[cid]=true;this.classList.add("selected");}
-          updateSelCount();
+
+      document.querySelectorAll(".card-del-btn").forEach(function(button){
+        button.addEventListener("click",function(event){
+          event.stopPropagation();
+
+          var cardId=this.dataset.id;
+
+          showConfirm("このカードを削除しますか？",function(){
+            dbDelete("cards",cardId).then(renderCardList);
+          });
+        });
+      });
+
+      if(selectMode){
+        document.querySelectorAll(".card-list-item").forEach(function(item){
+          item.addEventListener("click",function(event){
+            if(event.target.closest(".card-actions"))return;
+
+            var cardId=this.dataset.id;
+
+            if(selectedIds[cardId]){
+              delete selectedIds[cardId];
+              this.classList.remove("selected");
+            }else{
+              selectedIds[cardId]=true;
+              this.classList.add("selected");
+            }
+
+            updateSelCount();
+          });
         });
       }
-    }
-  });
+    })
+    .catch(function(error){
+      console.error(error);
+    });
 }
 
 function updateSelCount(){
-  var cnt=Object.keys(selectedIds).length;
-  G("sel-count").textContent=cnt+"件選択";
+  G("sel-count").textContent=
+    Object.keys(selectedIds).length+"件選択";
 }
 
-/* ===== カード追加/編集 ===== */
+/* ===== カード追加・編集 ===== */
+
 function clearCardForm(){
-  G("card-front-text").value="";G("card-back-text").value="";G("card-note").value="";
-  G("card-front-image").value="";G("card-back-image").value="";
-  G("card-front-audio").value="";G("card-back-audio").value="";
-  G("card-front-image-preview").innerHTML="";G("card-back-image-preview").innerHTML="";
-  G("card-front-audio-preview").innerHTML="";G("card-back-audio-preview").innerHTML="";
-  tempFrontImage=null;tempFrontAudio=null;tempBackImage=null;tempBackAudio=null;
+  G("card-front-text").value="";
+  G("card-back-text").value="";
+  G("card-note").value="";
+
+  G("card-front-image").value="";
+  G("card-front-audio").value="";
+  G("card-back-image").value="";
+  G("card-back-audio").value="";
+
+  G("card-front-image-preview").innerHTML="";
+  G("card-front-audio-preview").innerHTML="";
+  G("card-back-image-preview").innerHTML="";
+  G("card-back-audio-preview").innerHTML="";
+
+  tempFrontImage=null;
+  tempFrontAudio=null;
+  tempBackImage=null;
+  tempBackAudio=null;
 }
 
 function showAddCard(){
   editingCardId=null;
   clearCardForm();
+
   G("add-card-title").textContent="カード追加";
   showView("view-add-card");
+}
+
+function showBlobPreview(blob,containerId,type){
+  var container=G(containerId);
+  var url=URL.createObjectURL(blob);
+
+  container.innerHTML="";
+
+  if(type==="image"){
+    var image=document.createElement("img");
+
+    image.src=url;
+    image.alt="";
+    image.style.maxWidth="100%";
+    image.style.maxHeight="100px";
+    image.style.borderRadius="8px";
+
+    image.onload=function(){
+      URL.revokeObjectURL(url);
+    };
+
+    container.appendChild(image);
+  }else{
+    var audio=document.createElement("audio");
+
+    audio.controls=true;
+    audio.src=url;
+    audio.style.width="100%";
+
+    container.appendChild(audio);
+  }
 }
 
 function editCard(cardId){
   editingCardId=cardId;
   clearCardForm();
+
   G("add-card-title").textContent="カード編集";
-  dbGet("cards",cardId).then(function(c){
-    if(!c)return;
-    G("card-front-text").value=c.front.text||"";
-    G("card-back-text").value=c.back.text||"";
-    G("card-note").value=c.note||"";
-    if(c.front.imageBlob){tempFrontImage=c.front.imageBlob;showBlobPreview(c.front.imageBlob,"card-front-image-preview","image");}
-    if(c.front.audioBlob){tempFrontAudio=c.front.audioBlob;showBlobPreview(c.front.audioBlob,"card-front-audio-preview","audio");}
-    if(c.back.imageBlob){tempBackImage=c.back.imageBlob;showBlobPreview(c.back.imageBlob,"card-back-image-preview","image");}
-    if(c.back.audioBlob){tempBackAudio=c.back.audioBlob;showBlobPreview(c.back.audioBlob,"card-back-audio-preview","audio");}
+
+  dbGet("cards",cardId).then(function(rawCard){
+    if(!rawCard)return;
+
+    var card=normalizeReviewData(rawCard);
+
+    G("card-front-text").value=card.front.text;
+    G("card-back-text").value=card.back.text;
+    G("card-note").value=card.note;
+
+    if(card.front.imageBlob){
+      tempFrontImage=card.front.imageBlob;
+      showBlobPreview(
+        tempFrontImage,
+        "card-front-image-preview",
+        "image"
+      );
+    }
+
+    if(card.front.audioBlob){
+      tempFrontAudio=card.front.audioBlob;
+      showBlobPreview(
+        tempFrontAudio,
+        "card-front-audio-preview",
+        "audio"
+      );
+    }
+
+    if(card.back.imageBlob){
+      tempBackImage=card.back.imageBlob;
+      showBlobPreview(
+        tempBackImage,
+        "card-back-image-preview",
+        "image"
+      );
+    }
+
+    if(card.back.audioBlob){
+      tempBackAudio=card.back.audioBlob;
+      showBlobPreview(
+        tempBackAudio,
+        "card-back-audio-preview",
+        "audio"
+      );
+    }
+
     showView("view-add-card");
   });
-}
-
-function showBlobPreview(blob,containerId,type){
-  var url=URL.createObjectURL(blob);
-  if(type==="image"){
-    G(containerId).innerHTML='<img src="'+url+'" style="max-width:100%;max-height:100px;border-radius:8px">';
-  }else{
-    G(containerId).innerHTML='<audio controls src="'+url+'" style="width:100%"></audio>';
-  }
 }
 
 function saveCard(){
   var frontText=G("card-front-text").value.trim();
   var backText=G("card-back-text").value.trim();
   var note=G("card-note").value.trim();
-  if(!frontText&&!backText&&!tempFrontImage&&!tempBackImage&&!tempFrontAudio&&!tempBackAudio)return;
 
-  var p;
-  if(editingCardId){
-    p=dbGet("cards",editingCardId).then(function(existing){
-      return existing||{id:editingCardId,deckId:currentDeckId,easeFactor:2.5,interval:0,repetitions:0,nextReview:0,mistakeStreak:0,lastReviewed:0,history:[],createdAt:Date.now()};
-    });
-  }else{
-    p=Promise.resolve({id:uid(),deckId:currentDeckId,easeFactor:2.5,interval:0,repetitions:0,nextReview:0,mistakeStreak:0,lastReviewed:0,history:[],createdAt:Date.now()});
+  if(
+    !frontText&&
+    !backText&&
+    !tempFrontImage&&
+    !tempFrontAudio&&
+    !tempBackImage&&
+    !tempBackAudio
+  ){
+    return;
   }
 
-  p.then(function(card){
-    card.front={text:frontText,imageBlob:tempFrontImage,audioBlob:tempFrontAudio};
-    card.back={text:backText,imageBlob:tempBackImage,audioBlob:tempBackAudio};
+  var promise=editingCardId
+    ?dbGet("cards",editingCardId)
+    :Promise.resolve(null);
+
+  promise.then(function(existing){
+    var card=existing||createNewCard(currentDeckId);
+
+    normalizeReviewData(card);
+
+    card.deckId=currentDeckId;
+    card.front={
+      text:frontText,
+      imageBlob:tempFrontImage,
+      audioBlob:tempFrontAudio
+    };
+    card.back={
+      text:backText,
+      imageBlob:tempBackImage,
+      audioBlob:tempBackAudio
+    };
     card.note=note;
+
     return dbPut("cards",card);
   }).then(function(){
     showDeckDetail(currentDeckId);
+  }).catch(function(error){
+    console.error(error);
   });
 }
 
 /* ===== インポート ===== */
+
+function parseDelimitedLine(line,delimiter){
+  var values=[];
+  var current="";
+  var quoted=false;
+
+  for(var i=0;i<line.length;i++){
+    var character=line.charAt(i);
+
+    if(character==='"'){
+      if(quoted&&line.charAt(i+1)==='"'){
+        current+='"';
+        i++;
+      }else{
+        quoted=!quoted;
+      }
+    }else if(character===delimiter&&!quoted){
+      values.push(current);
+      current="";
+    }else{
+      current+=character;
+    }
+  }
+
+  values.push(current);
+  return values;
+}
+
 function parseImportText(text){
   var result=null;
+
   try{
     var json=JSON.parse(text);
+
     if(Array.isArray(json)){
       importSourceFormat="json";
-      result=[];
-      for(var i=0;i<json.length;i++){
-        var item=json[i];
-        result.push({
-          front:typeof item.front==="string"?item.front:(item[0]||""),
-          back:typeof item.back==="string"?item.back:(item[1]||""),
+
+      result=json.map(function(item){
+        item=item||{};
+
+        return {
+          front:
+            typeof item.front==="string"
+              ?item.front
+              :(item[0]||""),
+          back:
+            typeof item.back==="string"
+              ?item.back
+              :(item[1]||""),
           note:item.note||item[2]||"",
           frontImage:item.frontImage||null,
           frontAudio:item.frontAudio||null,
           backImage:item.backImage||null,
           backAudio:item.backAudio||null
+        };
+      });
+    }
+  }catch(error){
+    var delimiter=
+      G("import-delimiter").value==="tab"
+        ?"\t"
+        :",";
+
+    importSourceFormat=
+      delimiter==="\t"?"tsv":"csv";
+
+    result=[];
+
+    text.split(/\r?\n/).forEach(function(line){
+      if(!line.trim())return;
+
+      var parts=parseDelimitedLine(line,delimiter);
+      var front=(parts[0]||"").trim();
+      var back=(parts[1]||"").trim();
+      var note=(parts[2]||"").trim();
+
+      if(front||back){
+        result.push({
+          front:front,
+          back:back,
+          note:note,
+          frontImage:null,
+          frontAudio:null,
+          backImage:null,
+          backAudio:null
         });
       }
-    }
-  }catch(ex){
-    var delim=G("import-delimiter").value==="tab"?"\t":",";
-    importSourceFormat=delim==="\t"?"tsv":"csv";
-    var lines=text.split(/\r?\n/);
-    result=[];
-    for(var j=0;j<lines.length;j++){
-      var line=lines[j].trim();
-      if(!line)continue;
-      var parts=line.split(delim);
-      var f=(parts[0]||"").trim();
-      var b=(parts[1]||"").trim();
-      var n=(parts[2]||"").trim();
-      if(f||b)result.push({front:f,back:b,note:n,frontImage:null,frontAudio:null,backImage:null,backAudio:null});
-    }
+    });
   }
+
   return result;
 }
 
 function updateImportPreview(){
-  if(importData&&importData.length>0){
-    G("import-preview").textContent=importData.length+"件検出";
+  if(importData&&importData.length){
+    G("import-preview").textContent=
+      importData.length+"件検出";
     G("btn-confirm-import").disabled=false;
   }else{
-    G("import-preview").textContent="有効なデータなし";
+    G("import-preview").textContent=
+      "有効なデータがありません";
     G("btn-confirm-import").disabled=true;
   }
 }
 
 function processImportFile(file){
   importSourceFileName=file.name;
+
   var reader=new FileReader();
-  reader.onload=function(e){
-    importData=parseImportText(e.target.result);
+
+  reader.onload=function(event){
+    importData=parseImportText(event.target.result);
     updateImportPreview();
   };
+
   reader.readAsText(file);
 }
 
 function confirmImport(){
-  if(!importData||importData.length===0)return;
-  var p=Promise.resolve();
-  for(var i=0;i<importData.length;i++){
-    (function(item){
-      p=p.then(function(){
-        var card={
-          id:uid(),deckId:currentDeckId,
-          front:{text:item.front,imageBlob:dataURItoBlob(item.frontImage),audioBlob:dataURItoBlob(item.frontAudio)},
-          back:{text:item.back,imageBlob:dataURItoBlob(item.backImage),audioBlob:dataURItoBlob(item.backAudio)},
-          note:item.note||"",
-          easeFactor:2.5,interval:0,repetitions:0,nextReview:0,mistakeStreak:0,lastReviewed:0,history:[],createdAt:Date.now()
-        };
-        return dbPut("cards",card);
-      });
-    })(importData[i]);
-  }
-  p.then(function(){
-    return dbGet("decks",currentDeckId);
-  }).then(function(deck){
-    if(importSourceFileName)deck.sourceFileName=importSourceFileName;
-    if(importSourceFormat)deck.sourceFormat=importSourceFormat;
-    return dbPut("decks",deck);
-  }).then(function(){
-    closeModal("modal-import");
-    renderCardList();
+  if(!importData||!importData.length)return;
+
+  G("btn-confirm-import").disabled=true;
+
+  var promises=importData.map(function(item){
+    var card=createNewCard(currentDeckId);
+
+    card.front={
+      text:item.front||"",
+      imageBlob:dataURItoBlob(item.frontImage),
+      audioBlob:dataURItoBlob(item.frontAudio)
+    };
+
+    card.back={
+      text:item.back||"",
+      imageBlob:dataURItoBlob(item.backImage),
+      audioBlob:dataURItoBlob(item.backAudio)
+    };
+
+    card.note=item.note||"";
+
+    return dbPut("cards",card);
   });
+
+  Promise.all(promises)
+    .then(function(){
+      return dbGet("decks",currentDeckId);
+    })
+    .then(function(deck){
+      if(!deck)return;
+
+      if(importSourceFileName){
+        deck.sourceFileName=importSourceFileName;
+      }
+
+      if(importSourceFormat){
+        deck.sourceFormat=importSourceFormat;
+      }
+
+      return dbPut("decks",deck);
+    })
+    .then(function(){
+      closeModal("modal-import");
+      renderCardList();
+    })
+    .catch(function(error){
+      G("btn-confirm-import").disabled=false;
+      console.error(error);
+    });
 }
 
 /* ===== エクスポート ===== */
+
 function exportDeck(){
-  dbGet("decks",currentDeckId).then(function(deck){
-    return dbGetByIndex("cards","deckId",currentDeckId).then(function(cards){return{deck:deck,cards:cards};});
-  }).then(function(data){
-    var deck=data.deck;
-    var cards=data.cards;
-    var fmt=deck.sourceFormat||"json";
-    var fname=deck.sourceFileName||(deck.name+".json");
-    var promises=[];
-    for(var i=0;i<cards.length;i++){
-      (function(c){
-        promises.push(
-          Promise.all([
-            blobToDataURI(c.front.imageBlob),blobToDataURI(c.front.audioBlob),
-            blobToDataURI(c.back.imageBlob),blobToDataURI(c.back.audioBlob)
-          ]).then(function(uris){
-            return{front:c.front.text||"",back:c.back.text||"",note:c.note||"",
-              frontImage:uris[0],frontAudio:uris[1],backImage:uris[2],backAudio:uris[3]};
-          })
+  Promise.all([
+    dbGet("decks",currentDeckId),
+    dbGetByIndex("cards","deckId",currentDeckId)
+  ]).then(function(values){
+    var deck=values[0];
+    var cards=values[1];
+
+    var conversionPromises=cards.map(function(rawCard){
+      var card=normalizeReviewData(rawCard);
+
+      return Promise.all([
+        blobToDataURI(card.front.imageBlob),
+        blobToDataURI(card.front.audioBlob),
+        blobToDataURI(card.back.imageBlob),
+        blobToDataURI(card.back.audioBlob)
+      ]).then(function(media){
+        return {
+          front:card.front.text,
+          back:card.back.text,
+          note:card.note,
+          frontImage:media[0],
+          frontAudio:media[1],
+          backImage:media[2],
+          backAudio:media[3]
+        };
+      });
+    });
+
+    return Promise.all(conversionPromises).then(function(exportCards){
+      var format=deck.sourceFormat||"json";
+      var fileName=deck.sourceFileName||(deck.name+".json");
+
+      var hasMedia=exportCards.some(function(card){
+        return (
+          card.frontImage||
+          card.frontAudio||
+          card.backImage||
+          card.backAudio
         );
-      })(cards[i]);
-    }
-    Promise.all(promises).then(function(exportCards){
-      var content,type;
-      var hasMedia=exportCards.some(function(c){return c.frontImage||c.frontAudio||c.backImage||c.backAudio;});
-      if(hasMedia)fmt="json";
-      if(fmt==="json"){
+      });
+
+      if(hasMedia)format="json";
+
+      var content;
+      var type;
+
+      if(format==="json"){
         content=JSON.stringify(exportCards,null,2);
         type="application/json";
-        if(fname.indexOf(".json")===-1)fname=fname.replace(/\.[^.]+$/,"")+".json";
-      }else if(fmt==="tsv"){
-        var lines=[];
-        for(var j=0;j<exportCards.length;j++){
-          var ec=exportCards[j];
-          lines.push(ec.front+"\t"+ec.back+(ec.note?"\t"+ec.note:""));
+
+        if(!/\.json$/i.test(fileName)){
+          fileName=fileName.replace(/\.[^.]+$/,"")+".json";
         }
-        content=lines.join("\n");
+      }else if(format==="tsv"){
+        content=exportCards.map(function(card){
+          return (
+            card.front+"\t"+
+            card.back+
+            (card.note?"\t"+card.note:"")
+          );
+        }).join("\n");
+
         type="text/tab-separated-values";
-      }else{
-        var csvLines=[];
-        for(var k=0;k<exportCards.length;k++){
-          var cc=exportCards[k];
-          csvLines.push(csvEscape(cc.front)+","+csvEscape(cc.back)+(cc.note?","+csvEscape(cc.note):""));
+
+        if(!/\.tsv$/i.test(fileName)){
+          fileName=fileName.replace(/\.[^.]+$/,"")+".tsv";
         }
-        content=csvLines.join("\n");
+      }else{
+        content=exportCards.map(function(card){
+          return (
+            csvEscape(card.front)+","+
+            csvEscape(card.back)+
+            (card.note?","+csvEscape(card.note):"")
+          );
+        }).join("\n");
+
         type="text/csv";
+
+        if(!/\.csv$/i.test(fileName)){
+          fileName=fileName.replace(/\.[^.]+$/,"")+".csv";
+        }
       }
+
       var blob=new Blob([content],{type:type});
       var url=URL.createObjectURL(blob);
-      var a=document.createElement("a");
-      a.href=url;a.download=fname;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      var anchor=document.createElement("a");
+
+      anchor.href=url;
+      anchor.download=fileName;
+
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
       URL.revokeObjectURL(url);
     });
+  }).catch(function(error){
+    console.error(error);
   });
-}
-
-/* ===== 学習セッション ===== */
-function selectBySpacedRepetition(cards,count){
-  var now=Date.now();
-  var scored=[];
-  for(var i=0;i<cards.length;i++){
-    var c=cards[i];
-    var urgency=0;
-    if(c.nextReview<=now){
-      urgency=10+(now-c.nextReview)/86400000;
-    }else{
-      urgency=1/(1+(c.nextReview-now)/86400000);
-    }
-    if(c.mistakeStreak>0)urgency+=(c.mistakeStreak*5);
-    if(c.repetitions===0)urgency+=8;
-    urgency+=Math.random()*2;
-    scored.push({card:c,score:urgency});
-  }
-  scored.sort(function(a,b){return b.score-a.score;});
-  var result=[];
-  for(var j=0;j<Math.min(count,scored.length);j++){
-    result.push(scored[j].card);
-  }
-  return result;
-}
-
-function selectSequential(cards,count,offset){
-  var sorted=cards.slice().sort(function(a,b){return(a.createdAt||0)-(b.createdAt||0);});
-  var len=sorted.length;
-  var result=[];
-  var used={};
-  for(var i=0;i<count&&i<len;i++){
-    var idx=(offset+i)%len;
-    result.push(sorted[idx]);
-    used[sorted[idx].id]=true;
-  }
-  var mistakes=sorted.filter(function(c){return c.mistakeStreak>0&&!used[c.id];});
-  mistakes.sort(function(a,b){return b.mistakeStreak-a.mistakeStreak;});
-  var extra=mistakes.slice(0,Math.min(3,mistakes.length));
-  for(var j=0;j<extra.length;j++){
-    result.splice(Math.min(j*3+1,result.length),0,extra[j]);
-  }
-  return result;
-}
-
-function startSession(){
-  dbGetByIndex("cards","deckId",currentDeckId).then(function(all){
-    if(all.length===0)return;
-    var count=Math.min(parseInt(G("session-count").value)||10,all.length);
-    var rand=G("toggle-random").classList.contains("on");
-    if(rand){
-      sessionCards=selectBySpacedRepetition(all,count);
-      sessionIndex=0;sessionCorrect=0;sessionWrong=0;sessionAnswered=[];isFlipped=false;
-      G("btn-prev-card").disabled=true;
-      showView("view-session");
-      renderSessionCard();
-    }else{
-      dbGet("decks",currentDeckId).then(function(deck){
-        var offset=deck.seqOffset||0;
-        sessionCards=selectSequential(all,count,offset);
-        deck.seqOffset=(offset+count)%all.length;
-        return dbPut("decks",deck);
-      }).then(function(){
-        sessionIndex=0;sessionCorrect=0;sessionWrong=0;sessionAnswered=[];isFlipped=false;
-        G("btn-prev-card").disabled=true;
-        showView("view-session");
-        renderSessionCard();
-      });
-    }
-  });
-}
-
-function renderSessionCard(){
-  if(sessionIndex>=sessionCards.length){
-    showResult();
-    return;
-  }
-  var card=sessionCards[sessionIndex];
-  var rev=G("toggle-reverse").classList.contains("on");
-  var frontData=rev?card.back:card.front;
-  var backData=rev?card.front:card.back;
-  var noteData=card.note||"";
-
-  /* チラ見え防止: トランジション無効で表面にリセットしてから有効に戻す */
-  var fc=G("flashcard");
-  fc.classList.add("no-transition");
-  fc.classList.remove("flipped");
-  fc.offsetHeight;/* リフロー強制 */
-  fc.classList.remove("no-transition");
-
-  isFlipped=false;
-  G("answer-buttons").style.display="none";
-  G("tap-hint").style.display="block";
-
-  /* 表面 */
-  var frontHtml="";
-  if(frontData.text)frontHtml+='<div class="card-text">'+esc(frontData.text)+'</div>';
-  if(frontData.imageBlob){var u=URL.createObjectURL(frontData.imageBlob);frontHtml+='<img src="'+u+'">';}
-  if(frontData.audioBlob){var au=URL.createObjectURL(frontData.audioBlob);frontHtml+='<audio controls src="'+au+'"></audio>';}
-  G("fc-front-content").innerHTML=frontHtml;
-
-  /* 裏面 */
-  var backHtml="";
-  if(backData.text)backHtml+='<div class="card-text">'+esc(backData.text)+'</div>';
-  if(backData.imageBlob){var u2=URL.createObjectURL(backData.imageBlob);backHtml+='<img src="'+u2+'">';}
-  if(backData.audioBlob){var au2=URL.createObjectURL(backData.audioBlob);backHtml+='<audio controls src="'+au2+'"></audio>';}
-  if(noteData)backHtml+='<div class="card-note">'+esc(noteData)+'</div>';
-  G("fc-back-content").innerHTML=backHtml;
-
-  /* 進捗 */
-  var total=sessionCards.length;
-  G("session-progress-text").textContent=(sessionIndex+1)+" / "+total;
-  G("session-progress-bar").style.width=((sessionIndex+1)/total*100)+"%";
-
-  /* 前へボタン */
-  G("btn-prev-card").disabled=(sessionIndex===0);
-}
-
-function flipCard(){
-  var fc=G("flashcard");
-  if(isFlipped){
-    fc.classList.remove("flipped");
-    isFlipped=false;
-    G("answer-buttons").style.display="none";
-    G("tap-hint").style.display="block";
-  }else{
-    fc.classList.add("flipped");
-    isFlipped=true;
-    G("answer-buttons").style.display="flex";
-    G("tap-hint").style.display="none";
-  }
-}
-
-function answerCard(correct){
-  var card=sessionCards[sessionIndex];
-  var now=Date.now();
-
-  if(correct){
-    sessionCorrect++;
-    card.repetitions=(card.repetitions||0)+1;
-    card.mistakeStreak=0;
-    if(card.repetitions===1){card.interval=1;}
-    else if(card.repetitions===2){card.interval=6;}
-    else{card.interval=Math.round((card.interval||1)*(card.easeFactor||2.5));}
-    card.easeFactor=Math.max(1.3,(card.easeFactor||2.5)+0.1);
-  }else{
-    sessionWrong++;
-    card.repetitions=0;
-    card.interval=0;
-    card.mistakeStreak=(card.mistakeStreak||0)+1;
-    card.easeFactor=Math.max(1.3,(card.easeFactor||2.5)-0.2);
-  }
-  card.nextReview=now+(card.interval||0)*86400000;
-  card.lastReviewed=now;
-  if(!card.history)card.history=[];
-  card.history.push(correct);
-  if(card.history.length>20)card.history=card.history.slice(card.history.length-20);
-
-  sessionAnswered[sessionIndex]={correct:correct};
-
-  dbPut("cards",card).then(function(){
-    sessionIndex++;
-    isFlipped=false;
-    renderSessionCard();
-  });
-}
-
-function goToPrevCard(){
-  if(sessionIndex<=0)return;
-
-  /* 前の回答結果を取り消す */
-  var prevIdx=sessionIndex-1;
-  var prevAnswer=sessionAnswered[prevIdx];
-  if(prevAnswer){
-    if(prevAnswer.correct)sessionCorrect--;
-    else sessionWrong--;
-    delete sessionAnswered[prevIdx];
-  }
-
-  sessionIndex=prevIdx;
-  isFlipped=false;
-  renderSessionCard();
-}
-
-function endSessionEarly(){
-  var answered=0;
-  for(var i=0;i<sessionAnswered.length;i++){
-    if(sessionAnswered[i])answered++;
-  }
-  if(answered>0){
-    showResult();
-  }else{
-    showDeckDetail(currentDeckId);
-  }
-}
-
-function showResult(){
-  G("result-correct").textContent=sessionCorrect;
-  G("result-wrong").textContent=sessionWrong;
-  var total=sessionCorrect+sessionWrong;
-  if(total>0){
-    G("result-accuracy").textContent="正答率: "+Math.round(sessionCorrect/total*100)+"%";
-  }else{
-    G("result-accuracy").textContent="";
-  }
-  showView("view-result");
 }
 
 /* ===== カード移動 ===== */
+
 function showMoveModal(){
-  var ids=Object.keys(selectedIds);
-  if(ids.length===0)return;
+  if(Object.keys(selectedIds).length===0)return;
+
   dbGetAll("decks").then(function(decks){
-    var html="";
-    for(var i=0;i<decks.length;i++){
-      if(decks[i].id!==currentDeckId){
-        html+='<option value="'+esc(decks[i].id)+'">'+esc(decks[i].name)+'</option>';
-      }
-    }
-    if(!html){
-      G("move-target-deck").innerHTML='<option disabled>移動先がありません</option>';
+    var available=decks.filter(function(deck){
+      return deck.id!==currentDeckId;
+    });
+
+    if(available.length===0){
+      G("move-target-deck").innerHTML=
+        "<option>移動先がありません</option>";
       G("btn-confirm-move").disabled=true;
     }else{
-      G("move-target-deck").innerHTML=html;
+      G("move-target-deck").innerHTML=
+        available.map(function(deck){
+          return (
+            '<option value="'+esc(deck.id)+'">'+
+              esc(deck.name)+
+            "</option>"
+          );
+        }).join("");
+
       G("btn-confirm-move").disabled=false;
     }
+
     showModal("modal-move");
   });
 }
 
 function confirmMove(){
   var targetId=G("move-target-deck").value;
+
   if(!targetId)return;
-  var ids=Object.keys(selectedIds);
-  var p=Promise.resolve();
-  for(var i=0;i<ids.length;i++){
-    (function(cid){
-      p=p.then(function(){
-        return dbGet("cards",cid).then(function(card){
-          if(card){card.deckId=targetId;return dbPut("cards",card);}
-        });
-      });
-    })(ids[i]);
-  }
-  p.then(function(){
+
+  var promises=Object.keys(selectedIds).map(function(cardId){
+    return dbGet("cards",cardId).then(function(card){
+      if(!card)return;
+
+      card.deckId=targetId;
+      return dbPut("cards",card);
+    });
+  });
+
+  Promise.all(promises).then(function(){
     closeModal("modal-move");
+
     selectMode=false;
     selectedIds={};
+
     G("select-bar").style.display="none";
     G("btn-toggle-select").textContent="選択";
+
     renderCardList();
   });
 }
 
-/* ===== イベントバインド ===== */
+/* ===== この続きに学習処理とイベント処理が入ります ===== */
+/* ===== 忘却曲線・出題選択 ===== */
+
+/*
+ * intervalを記憶が安定している期間として扱います。
+ * intervalと同じ日数が経過した時点で、
+ * 記憶保持率が約90%になる曲線を使用します。
+ */
+function calculateForgettingRisk(card,now){
+  normalizeReviewData(card);
+
+  if(!card.lastReviewed){
+    return 1;
+  }
+
+  var dayMs=86400000;
+
+  var elapsedDays=Math.max(
+    0,
+    (now-card.lastReviewed)/dayMs
+  );
+
+  var stabilityDays=Math.max(
+    0.25,
+    card.interval||1
+  );
+
+  var retention=Math.pow(
+    0.9,
+    elapsedDays/stabilityDays
+  );
+
+  var risk=1-retention;
+
+  /*
+   * 復習予定日を過ぎている場合は、
+   * 超過した期間に応じて優先度を上げます。
+   */
+  if(card.nextReview&&card.nextReview<=now){
+    var overdueDays=
+      (now-card.nextReview)/dayMs;
+
+    var overdueRatio=
+      overdueDays/stabilityDays;
+
+    risk+=Math.min(
+      0.5,
+      overdueRatio*0.1
+    );
+  }
+
+  return Math.max(
+    0,
+    Math.min(1.5,risk)
+  );
+}
+
+/*
+ * ランダムモードの優先順位:
+ *
+ * 1. 一度も回答していないカード
+ * 2. 不正解状態が解消されていないカード
+ * 3. その他を忘却リスク順
+ */
+function selectBySpacedRepetition(cards,count){
+  var now=Date.now();
+
+  var unseen=[];
+  var failed=[];
+  var regular=[];
+
+  cards.forEach(function(rawCard){
+    var card=normalizeReviewData(rawCard);
+
+    var hasBeenAnswered=
+      card.lastReviewed>0||
+      card.history.length>0;
+
+    if(!hasBeenAnswered){
+      unseen.push(card);
+      return;
+    }
+
+    if(card.mistakeStreak>0){
+      var elapsedDays=
+        card.lastReviewed
+          ?Math.max(
+            0,
+            (now-card.lastReviewed)/86400000
+          )
+          :0;
+
+      failed.push({
+        card:card,
+        score:
+          card.mistakeStreak*10+
+          elapsedDays+
+          Math.random()
+      });
+
+      return;
+    }
+
+    regular.push({
+      card:card,
+      risk:calculateForgettingRisk(card,now),
+      random:Math.random()
+    });
+  });
+
+  /*
+   * 未回答カード同士はランダムです。
+   */
+  unseen=shuffleArray(unseen);
+
+  /*
+   * 連続不正解回数が多いカードを優先します。
+   */
+  failed.sort(function(a,b){
+    return b.score-a.score;
+  });
+
+  /*
+   * 通常カードは忘却リスク順です。
+   * 忘却リスクがほぼ等しい場合だけ、
+   * ランダムに順番を変えます。
+   */
+  regular.sort(function(a,b){
+    var difference=b.risk-a.risk;
+
+    if(Math.abs(difference)>0.02){
+      return difference;
+    }
+
+    return b.random-a.random;
+  });
+
+  var ordered=[];
+
+  unseen.forEach(function(card){
+    ordered.push(card);
+  });
+
+  failed.forEach(function(item){
+    ordered.push(item.card);
+  });
+
+  regular.forEach(function(item){
+    ordered.push(item.card);
+  });
+
+  return ordered.slice(
+    0,
+    Math.min(count,ordered.length)
+  );
+}
+
+function selectSequential(cards,count,offset){
+  var sorted=cards.slice().sort(function(a,b){
+    return (a.createdAt||0)-(b.createdAt||0);
+  });
+
+  if(sorted.length===0)return [];
+
+  var result=[];
+
+  for(var i=0;i<count&&i<sorted.length;i++){
+    result.push(
+      sorted[(offset+i)%sorted.length]
+    );
+  }
+
+  return result;
+}
+
+/* ===== 学習セッション ===== */
+
+var sessionObjectUrls=[];
+
+function clearSessionObjectUrls(){
+  sessionObjectUrls.forEach(function(url){
+    URL.revokeObjectURL(url);
+  });
+
+  sessionObjectUrls=[];
+}
+
+function createSessionObjectUrl(blob){
+  var url=URL.createObjectURL(blob);
+
+  sessionObjectUrls.push(url);
+  return url;
+}
+
+function clearSessionMedia(){
+  clearSessionObjectUrls();
+
+  G("fc-front-content").innerHTML="";
+  G("fc-back-content").innerHTML="";
+}
+
+function setAnswerButtonsDisabled(disabled){
+  G("btn-answer-correct").disabled=disabled;
+  G("btn-answer-wrong").disabled=disabled;
+}
+
+function initializeSessionState(){
+  sessionIndex=0;
+  sessionCorrect=0;
+  sessionWrong=0;
+  sessionAnswered=[];
+  sessionReverse=
+    G("toggle-reverse").classList.contains("on");
+
+  isFlipped=false;
+  answerLocked=false;
+
+  setAnswerButtonsDisabled(false);
+  G("btn-prev-card").disabled=true;
+
+  showView("view-session");
+  renderSessionCard();
+}
+
+function startSession(){
+  clearResultObjectUrls();
+  clearSessionMedia();
+
+  dbGetByIndex("cards","deckId",currentDeckId)
+    .then(function(cards){
+      if(cards.length===0)return;
+
+      cards.forEach(function(card){
+        normalizeReviewData(card);
+      });
+
+      var requested=parseInt(
+        G("session-count").value,
+        10
+      )||10;
+
+      var count=Math.min(
+        Math.max(1,requested),
+        cards.length
+      );
+
+      var randomMode=
+        G("toggle-random").classList.contains("on");
+
+      if(randomMode){
+        sessionCards=selectBySpacedRepetition(
+          cards,
+          count
+        );
+
+        initializeSessionState();
+        return;
+      }
+
+      return dbGet("decks",currentDeckId)
+        .then(function(deck){
+          if(!deck)return;
+
+          var offset=deck.seqOffset||0;
+
+          sessionCards=selectSequential(
+            cards,
+            count,
+            offset
+          );
+
+          deck.seqOffset=
+            (offset+sessionCards.length)%cards.length;
+
+          return dbPut("decks",deck);
+        })
+        .then(function(){
+          initializeSessionState();
+        });
+    })
+    .catch(function(error){
+      console.error(error);
+    });
+}
+
+function appendCardContent(container,data,note){
+  container.innerHTML="";
+  data=normalizeCardSide(data);
+
+  if(data.text){
+    var textElement=document.createElement("div");
+
+    textElement.className="card-text";
+    textElement.textContent=data.text;
+
+    container.appendChild(textElement);
+  }
+
+  if(data.imageBlob){
+    var image=document.createElement("img");
+
+    image.src=createSessionObjectUrl(
+      data.imageBlob
+    );
+
+    image.alt="";
+    container.appendChild(image);
+  }
+
+  if(data.audioBlob){
+    var audio=document.createElement("audio");
+
+    audio.controls=true;
+    audio.src=createSessionObjectUrl(
+      data.audioBlob
+    );
+
+    container.appendChild(audio);
+  }
+
+  if(note){
+    var noteElement=document.createElement("div");
+
+    noteElement.className="card-note";
+    noteElement.textContent=note;
+
+    container.appendChild(noteElement);
+  }
+}
+
+function renderSessionCard(){
+  if(sessionIndex>=sessionCards.length){
+    clearSessionMedia();
+    showResult();
+    return;
+  }
+
+  clearSessionObjectUrls();
+
+  var card=normalizeReviewData(
+    sessionCards[sessionIndex]
+  );
+
+  var questionData=
+    sessionReverse
+      ?card.back
+      :card.front;
+
+  var answerData=
+    sessionReverse
+      ?card.front
+      :card.back;
+
+  var flashcard=G("flashcard");
+
+  /*
+   * 次のカードの裏面が一瞬見えることを防ぎます。
+   */
+  flashcard.classList.add("no-transition");
+  flashcard.classList.remove("flipped");
+
+  void flashcard.offsetHeight;
+
+  flashcard.classList.remove("no-transition");
+
+  isFlipped=false;
+
+  G("answer-buttons").style.display="none";
+  G("tap-hint").style.display="block";
+
+  appendCardContent(
+    G("fc-front-content"),
+    questionData,
+    ""
+  );
+
+  appendCardContent(
+    G("fc-back-content"),
+    answerData,
+    card.note
+  );
+
+  var total=sessionCards.length;
+
+  G("session-progress-text").textContent=
+    (sessionIndex+1)+" / "+total;
+
+  G("session-progress-bar").style.width=
+    ((sessionIndex+1)/total*100)+"%";
+
+  G("btn-prev-card").disabled=
+    answerLocked||sessionIndex===0;
+}
+
+function flipCard(){
+  if(answerLocked)return;
+  if(sessionIndex>=sessionCards.length)return;
+
+  var flashcard=G("flashcard");
+
+  if(isFlipped){
+    flashcard.classList.remove("flipped");
+    isFlipped=false;
+
+    G("answer-buttons").style.display="none";
+    G("tap-hint").style.display="block";
+  }else{
+    flashcard.classList.add("flipped");
+    isFlipped=true;
+
+    G("answer-buttons").style.display="flex";
+    G("tap-hint").style.display="none";
+  }
+}
+
+/* ===== 回答前の状態保存 ===== */
+
+function captureReviewState(card){
+  normalizeReviewData(card);
+
+  return {
+    easeFactor:card.easeFactor,
+    interval:card.interval,
+    repetitions:card.repetitions,
+    nextReview:card.nextReview,
+    mistakeStreak:card.mistakeStreak,
+    lastReviewed:card.lastReviewed,
+    history:card.history.slice()
+  };
+}
+
+function restoreReviewState(card,state){
+  if(!state)return;
+
+  card.easeFactor=state.easeFactor;
+  card.interval=state.interval;
+  card.repetitions=state.repetitions;
+  card.nextReview=state.nextReview;
+  card.mistakeStreak=state.mistakeStreak;
+  card.lastReviewed=state.lastReviewed;
+  card.history=state.history.slice();
+}
+
+/* ===== 回答処理 ===== */
+
+function answerCard(correct){
+  if(answerLocked)return;
+  if(!isFlipped)return;
+  if(sessionIndex>=sessionCards.length)return;
+
+  answerLocked=true;
+  setAnswerButtonsDisabled(true);
+
+  var answerIndex=sessionIndex;
+
+  var card=normalizeReviewData(
+    sessionCards[answerIndex]
+  );
+
+  var now=Date.now();
+  var beforeState=captureReviewState(card);
+
+  if(correct){
+    sessionCorrect++;
+
+    card.repetitions+=1;
+    card.mistakeStreak=0;
+
+    if(card.repetitions===1){
+      card.interval=1;
+    }else if(card.repetitions===2){
+      card.interval=3;
+    }else{
+      card.interval=Math.max(
+        1,
+        Math.round(
+          (card.interval||1)*
+          (card.easeFactor||2.5)
+        )
+      );
+    }
+
+    card.easeFactor=Math.min(
+      3,
+      Math.max(
+        1.3,
+        (card.easeFactor||2.5)+0.05
+      )
+    );
+
+    card.nextReview=
+      now+card.interval*86400000;
+  }else{
+    sessionWrong++;
+
+    card.repetitions=0;
+    card.interval=0;
+    card.mistakeStreak+=1;
+
+    card.easeFactor=Math.max(
+      1.3,
+      (card.easeFactor||2.5)-0.2
+    );
+
+    /*
+     * 不正解カードは10分後を復習予定にします。
+     * ただし次のセッションでは、
+     * mistakeStreakにより最優先グループへ入ります。
+     */
+    card.nextReview=
+      now+10*60*1000;
+  }
+
+  card.lastReviewed=now;
+  card.history.push(correct);
+
+  if(card.history.length>20){
+    card.history=card.history.slice(-20);
+  }
+
+  sessionAnswered[answerIndex]={
+    cardId:card.id,
+    correct:correct,
+    before:beforeState,
+    answeredAt:now
+  };
+
+  dbPut("cards",card)
+    .then(function(){
+      sessionIndex=answerIndex+1;
+      isFlipped=false;
+      answerLocked=false;
+
+      setAnswerButtonsDisabled(false);
+      renderSessionCard();
+    })
+    .catch(function(error){
+      /*
+       * 保存失敗時は回答前の状態へ戻します。
+       */
+      restoreReviewState(
+        card,
+        beforeState
+      );
+
+      delete sessionAnswered[answerIndex];
+
+      if(correct){
+        sessionCorrect=Math.max(
+          0,
+          sessionCorrect-1
+        );
+      }else{
+        sessionWrong=Math.max(
+          0,
+          sessionWrong-1
+        );
+      }
+
+      answerLocked=false;
+      setAnswerButtonsDisabled(false);
+
+      console.error(error);
+    });
+}
+
+/* ===== 前の問題へ戻る ===== */
+
+function goToPrevCard(){
+  if(answerLocked)return;
+  if(sessionIndex<=0)return;
+
+  var previousIndex=sessionIndex-1;
+  var previousAnswer=sessionAnswered[previousIndex];
+  var card=sessionCards[previousIndex];
+
+  answerLocked=true;
+  G("btn-prev-card").disabled=true;
+
+  if(!previousAnswer){
+    sessionIndex=previousIndex;
+    answerLocked=false;
+    renderSessionCard();
+    return;
+  }
+
+  /*
+   * DB保存に失敗した場合に備え、
+   * 回答後の状態も一時保存します。
+   */
+  var answeredState=captureReviewState(card);
+
+  restoreReviewState(
+    card,
+    previousAnswer.before
+  );
+
+  dbPut("cards",card)
+    .then(function(){
+      if(previousAnswer.correct){
+        sessionCorrect=Math.max(
+          0,
+          sessionCorrect-1
+        );
+      }else{
+        sessionWrong=Math.max(
+          0,
+          sessionWrong-1
+        );
+      }
+
+      delete sessionAnswered[previousIndex];
+
+      sessionIndex=previousIndex;
+      isFlipped=false;
+      answerLocked=false;
+
+      renderSessionCard();
+    })
+    .catch(function(error){
+      restoreReviewState(
+        card,
+        answeredState
+      );
+
+      answerLocked=false;
+      renderSessionCard();
+
+      console.error(error);
+    });
+}
+
+function endSessionEarly(){
+  if(answerLocked)return;
+
+  var answeredCount=sessionAnswered.filter(function(answer){
+    return !!answer;
+  }).length;
+
+  clearSessionMedia();
+
+  if(answeredCount>0){
+    showResult();
+  }else{
+    showDeckDetail(currentDeckId);
+  }
+}
+
+/* ===== 結果一覧 ===== */
+
+function clearResultObjectUrls(){
+  resultObjectUrls.forEach(function(url){
+    URL.revokeObjectURL(url);
+  });
+
+  resultObjectUrls=[];
+}
+
+function createResultObjectUrl(blob){
+  var url=URL.createObjectURL(blob);
+
+  resultObjectUrls.push(url);
+  return url;
+}
+
+function makeResultMediaHtml(data){
+  data=normalizeCardSide(data);
+
+  var html="";
+
+  if(data.imageBlob){
+    html+=
+      '<div class="result-review-media">'+
+        '<img src="'+
+          createResultObjectUrl(data.imageBlob)+
+        '" alt="">'+
+      '</div>';
+  }
+
+  if(data.audioBlob){
+    html+=
+      '<div class="result-review-media">'+
+        '<audio controls src="'+
+          createResultObjectUrl(data.audioBlob)+
+        '"></audio>'+
+      '</div>';
+  }
+
+  return html;
+}
+
+function makeResultSideHtml(label,data){
+  data=normalizeCardSide(data);
+
+  var html=
+    '<div class="result-review-row">'+
+      '<div class="result-review-label">'+
+        esc(label)+
+      '</div>';
+
+  if(data.text){
+    html+=
+      '<div class="result-review-text">'+
+        esc(data.text)+
+      '</div>';
+  }else if(!data.imageBlob&&!data.audioBlob){
+    html+=
+      '<div class="result-review-text text-dim">'+
+        '内容なし'+
+      '</div>';
+  }
+
+  html+=makeResultMediaHtml(data);
+  html+="</div>";
+
+  return html;
+}
+
+function renderResultReviewList(){
+  clearResultObjectUrls();
+
+  var html="";
+  var displayNumber=0;
+
+  sessionCards.forEach(function(rawCard,index){
+    var answer=sessionAnswered[index];
+
+    if(!answer)return;
+
+    var card=normalizeReviewData(rawCard);
+
+    displayNumber++;
+
+    var questionData=
+      sessionReverse
+        ?card.back
+        :card.front;
+
+    var answerData=
+      sessionReverse
+        ?card.front
+        :card.back;
+
+    var statusClass=
+      answer.correct
+        ?"correct"
+        :"wrong";
+
+    var statusText=
+      answer.correct
+        ?"正解"
+        :"不正解";
+
+    html+=
+      '<div class="result-review-item '+statusClass+'">'+
+        '<div class="result-review-head">'+
+          '<span class="result-review-number">'+
+            '問題 '+displayNumber+
+          '</span>'+
+          '<span class="result-review-status '+statusClass+'">'+
+            statusText+
+          '</span>'+
+        '</div>';
+
+    html+=makeResultSideHtml(
+      "問題",
+      questionData
+    );
+
+    html+=makeResultSideHtml(
+      "解答",
+      answerData
+    );
+
+    if(card.note){
+      html+=
+        '<div class="result-review-note">'+
+          '<div class="result-review-label">'+
+            'メモ'+
+          '</div>'+
+          '<div class="result-review-text">'+
+            esc(card.note)+
+          '</div>'+
+        '</div>';
+    }
+
+    html+="</div>";
+  });
+
+  if(!html){
+    html=
+      '<div class="empty-state">'+
+        '回答した問題はありません'+
+      '</div>';
+  }
+
+  G("result-review-list").innerHTML=html;
+}
+
+function showResult(){
+  G("result-correct").textContent=
+    sessionCorrect;
+
+  G("result-wrong").textContent=
+    sessionWrong;
+
+  var total=sessionCorrect+sessionWrong;
+
+  if(total>0){
+    G("result-accuracy").textContent=
+      "回答数: "+total+"問 / 正答率: "+
+      Math.round(sessionCorrect/total*100)+"%";
+  }else{
+    G("result-accuracy").textContent=
+      "回答はありません";
+  }
+
+  renderResultReviewList();
+  showView("view-result");
+}
+
+/* ===== 選択カードの削除 ===== */
+
+function deleteSelectedCards(){
+  var ids=Object.keys(selectedIds);
+
+  if(ids.length===0)return;
+
+  showConfirm(
+    ids.length+"件のカードを削除しますか？",
+    function(){
+      Promise.all(
+        ids.map(function(cardId){
+          return dbDelete("cards",cardId);
+        })
+      ).then(function(){
+        selectMode=false;
+        selectedIds={};
+
+        G("select-bar").style.display="none";
+        G("btn-toggle-select").textContent="選択";
+
+        renderCardList();
+      });
+    }
+  );
+}
+
+/* ===== イベント ===== */
+
 function bindEvents(){
   /* デッキ作成 */
+
   G("btn-show-create-deck").addEventListener("click",function(){
     G("new-deck-name").value="";
     showModal("modal-create-deck");
+    G("new-deck-name").focus();
   });
-  G("btn-confirm-create-deck").addEventListener("click",createDeck);
-  G("btn-cancel-create-deck").addEventListener("click",function(){closeModal("modal-create-deck");});
 
-  /* デッキ詳細→一覧 */
-  G("btn-back-to-decks").addEventListener("click",function(){showView("view-decks");renderDeckList();});
+  G("btn-confirm-create-deck").addEventListener(
+    "click",
+    createDeck
+  );
 
-  /* カード追加 */
-  G("btn-show-add-card").addEventListener("click",showAddCard);
-  G("btn-cancel-add-card").addEventListener("click",function(){showDeckDetail(currentDeckId);});
-  G("btn-save-card").addEventListener("click",saveCard);
+  G("new-deck-name").addEventListener("keydown",function(event){
+    if(event.key==="Enter"){
+      createDeck();
+    }
+  });
 
-  /* ファイル入力 */
-  G("card-front-image").addEventListener("change",function(){fileToBlob(this.files[0]).then(function(b){if(b){tempFrontImage=b;showBlobPreview(b,"card-front-image-preview","image");}});});
-  G("card-front-audio").addEventListener("change",function(){fileToBlob(this.files[0]).then(function(b){if(b){tempFrontAudio=b;showBlobPreview(b,"card-front-audio-preview","audio");}});});
-  G("card-back-image").addEventListener("change",function(){fileToBlob(this.files[0]).then(function(b){if(b){tempBackImage=b;showBlobPreview(b,"card-back-image-preview","image");}});});
-  G("card-back-audio").addEventListener("change",function(){fileToBlob(this.files[0]).then(function(b){if(b){tempBackAudio=b;showBlobPreview(b,"card-back-audio-preview","audio");}});});
+  G("btn-cancel-create-deck").addEventListener("click",function(){
+    closeModal("modal-create-deck");
+  });
+
+  /* デッキ詳細 */
+
+  G("btn-back-to-decks").addEventListener("click",function(){
+    clearResultObjectUrls();
+    showView("view-decks");
+    renderDeckList();
+  });
+
+  /* カード追加・編集 */
+
+  G("btn-show-add-card").addEventListener(
+    "click",
+    showAddCard
+  );
+
+  G("btn-cancel-add-card").addEventListener("click",function(){
+    showDeckDetail(currentDeckId);
+  });
+
+  G("btn-save-card").addEventListener(
+    "click",
+    saveCard
+  );
+
+  /* 画像・音声 */
+
+  G("card-front-image").addEventListener("change",function(){
+    fileToBlob(this.files[0]).then(function(blob){
+      if(!blob)return;
+
+      tempFrontImage=blob;
+
+      showBlobPreview(
+        blob,
+        "card-front-image-preview",
+        "image"
+      );
+    });
+  });
+
+  G("card-front-audio").addEventListener("change",function(){
+    fileToBlob(this.files[0]).then(function(blob){
+      if(!blob)return;
+
+      tempFrontAudio=blob;
+
+      showBlobPreview(
+        blob,
+        "card-front-audio-preview",
+        "audio"
+      );
+    });
+  });
+
+  G("card-back-image").addEventListener("change",function(){
+    fileToBlob(this.files[0]).then(function(blob){
+      if(!blob)return;
+
+      tempBackImage=blob;
+
+      showBlobPreview(
+        blob,
+        "card-back-image-preview",
+        "image"
+      );
+    });
+  });
+
+  G("card-back-audio").addEventListener("change",function(){
+    fileToBlob(this.files[0]).then(function(blob){
+      if(!blob)return;
+
+      tempBackAudio=blob;
+
+      showBlobPreview(
+        blob,
+        "card-back-audio-preview",
+        "audio"
+      );
+    });
+  });
 
   /* インポート */
+
   G("btn-show-import").addEventListener("click",function(){
-    importData=null;importSourceFileName=null;importSourceFormat=null;
-    G("import-preview").innerHTML="";G("import-file").value="";G("import-paste").value="";
+    importData=null;
+    importSourceFileName=null;
+    importSourceFormat=null;
+
+    G("import-preview").textContent="";
+    G("import-file").value="";
+    G("import-paste").value="";
     G("btn-confirm-import").disabled=true;
+
     showModal("modal-import");
   });
-  G("import-drop").addEventListener("click",function(){G("import-file").click();});
-  G("import-drop").addEventListener("dragover",function(e){e.preventDefault();this.classList.add("dragover");});
-  G("import-drop").addEventListener("dragleave",function(){this.classList.remove("dragover");});
-  G("import-drop").addEventListener("drop",function(e){e.preventDefault();this.classList.remove("dragover");if(e.dataTransfer.files.length>0)processImportFile(e.dataTransfer.files[0]);});
-  G("import-file").addEventListener("change",function(){if(this.files.length>0){G("import-paste").value="";processImportFile(this.files[0]);}});
+
+  G("import-drop").addEventListener("click",function(){
+    G("import-file").click();
+  });
+
+  G("import-drop").addEventListener("dragover",function(event){
+    event.preventDefault();
+    this.classList.add("dragover");
+  });
+
+  G("import-drop").addEventListener("dragleave",function(){
+    this.classList.remove("dragover");
+  });
+
+  G("import-drop").addEventListener("drop",function(event){
+    event.preventDefault();
+    this.classList.remove("dragover");
+
+    if(event.dataTransfer.files.length){
+      processImportFile(
+        event.dataTransfer.files[0]
+      );
+    }
+  });
+
+  G("import-file").addEventListener("change",function(){
+    if(this.files.length){
+      G("import-paste").value="";
+      processImportFile(this.files[0]);
+    }
+  });
+
   G("import-paste").addEventListener("input",function(){
-    var text=G("import-paste").value.trim();
-    if(!text){importData=null;G("import-preview").innerHTML="";G("btn-confirm-import").disabled=true;return;}
+    var text=this.value.trim();
+
     importSourceFileName=null;
+
+    if(!text){
+      importData=null;
+      G("import-preview").textContent="";
+      G("btn-confirm-import").disabled=true;
+      return;
+    }
+
     importData=parseImportText(text);
     updateImportPreview();
   });
-  G("btn-confirm-import").addEventListener("click",confirmImport);
-  G("btn-cancel-import").addEventListener("click",function(){closeModal("modal-import");});
+
+  G("import-delimiter").addEventListener("change",function(){
+    var text=G("import-paste").value.trim();
+
+    if(text){
+      importData=parseImportText(text);
+      updateImportPreview();
+    }
+  });
+
+  G("btn-confirm-import").addEventListener(
+    "click",
+    confirmImport
+  );
+
+  G("btn-cancel-import").addEventListener("click",function(){
+    closeModal("modal-import");
+  });
 
   /* エクスポート */
-  G("btn-export").addEventListener("click",exportDeck);
 
-  /* 選択モード */
+  G("btn-export").addEventListener(
+    "click",
+    exportDeck
+  );
+
+  /* カード選択 */
+
   G("btn-toggle-select").addEventListener("click",function(){
     selectMode=!selectMode;
     selectedIds={};
-    G("select-bar").style.display=selectMode?"flex":"none";
-    G("btn-toggle-select").textContent=selectMode?"選択中":"選択";
+
+    G("select-bar").style.display=
+      selectMode?"flex":"none";
+
+    G("btn-toggle-select").textContent=
+      selectMode?"選択中":"選択";
+
     updateSelCount();
     renderCardList();
   });
+
   G("btn-cancel-select").addEventListener("click",function(){
-    selectMode=false;selectedIds={};
+    selectMode=false;
+    selectedIds={};
+
     G("select-bar").style.display="none";
     G("btn-toggle-select").textContent="選択";
+
     renderCardList();
   });
-  G("btn-delete-selected").addEventListener("click",function(){
-    var ids=Object.keys(selectedIds);
-    if(ids.length===0)return;
-    showConfirm(ids.length+"件のカードを削除しますか？",function(){
-      var p=Promise.resolve();
-      for(var i=0;i<ids.length;i++){
-        (function(cid){p=p.then(function(){return dbDelete("cards",cid);});})(ids[i]);
-      }
-      p.then(function(){
-        selectMode=false;selectedIds={};
-        G("select-bar").style.display="none";
-        G("btn-toggle-select").textContent="選択";
-        renderCardList();
-      });
-    });
+
+  G("btn-delete-selected").addEventListener(
+    "click",
+    deleteSelectedCards
+  );
+
+  G("btn-move-cards").addEventListener(
+    "click",
+    showMoveModal
+  );
+
+  G("btn-confirm-move").addEventListener(
+    "click",
+    confirmMove
+  );
+
+  G("btn-cancel-move").addEventListener("click",function(){
+    closeModal("modal-move");
   });
-  G("btn-move-cards").addEventListener("click",showMoveModal);
-  G("btn-confirm-move").addEventListener("click",confirmMove);
-  G("btn-cancel-move").addEventListener("click",function(){closeModal("modal-move");});
 
   /* 確認モーダル */
-  G("btn-ok-confirm").addEventListener("click",function(){closeModal("modal-confirm");if(confirmCallback){confirmCallback();confirmCallback=null;}});
-  G("btn-cancel-confirm").addEventListener("click",function(){closeModal("modal-confirm");confirmCallback=null;});
 
-  /* トグルスイッチ */
-  G("toggle-random").addEventListener("click",function(){this.classList.toggle("on");});
-  G("toggle-reverse").addEventListener("click",function(){this.classList.toggle("on");});
+  G("btn-ok-confirm").addEventListener("click",function(){
+    closeModal("modal-confirm");
+
+    var callback=confirmCallback;
+    confirmCallback=null;
+
+    if(callback){
+      callback();
+    }
+  });
+
+  G("btn-cancel-confirm").addEventListener("click",function(){
+    closeModal("modal-confirm");
+    confirmCallback=null;
+  });
+
+  /* モーダルの背景を押した場合 */
+
+  document.querySelectorAll(".modal-overlay").forEach(function(overlay){
+    overlay.addEventListener("click",function(event){
+      if(event.target!==overlay)return;
+      if(overlay.id==="modal-confirm")return;
+
+      closeModal(overlay.id);
+    });
+  });
+
+  /* 設定スイッチ */
+
+  G("toggle-random").addEventListener("click",function(){
+    this.classList.toggle("on");
+  });
+
+  G("toggle-reverse").addEventListener("click",function(){
+    this.classList.toggle("on");
+  });
 
   /* 学習セッション */
-  G("btn-start-session").addEventListener("click",startSession);
-  G("flashcard").addEventListener("click",flipCard);
-  G("btn-answer-correct").addEventListener("click",function(){answerCard(true);});
-  G("btn-answer-wrong").addEventListener("click",function(){answerCard(false);});
-  G("btn-prev-card").addEventListener("click",goToPrevCard);
-  G("btn-end-session").addEventListener("click",endSessionEarly);
+
+  G("btn-start-session").addEventListener(
+    "click",
+    startSession
+  );
+
+  G("flashcard").addEventListener("click",function(event){
+    /*
+     * 音声プレーヤーを操作したときは、
+     * カードを反転させません。
+     */
+    if(event.target.closest("audio"))return;
+
+    flipCard();
+  });
+
+  G("btn-answer-correct").addEventListener("click",function(){
+    answerCard(true);
+  });
+
+  G("btn-answer-wrong").addEventListener("click",function(){
+    answerCard(false);
+  });
+
+  G("btn-prev-card").addEventListener(
+    "click",
+    goToPrevCard
+  );
+
+  G("btn-end-session").addEventListener(
+    "click",
+    endSessionEarly
+  );
 
   /* 結果画面 */
-  G("btn-retry").addEventListener("click",startSession);
-  G("btn-back-to-deck").addEventListener("click",function(){showDeckDetail(currentDeckId);});
+
+  G("btn-retry").addEventListener(
+    "click",
+    startSession
+  );
+
+  G("btn-back-to-deck").addEventListener("click",function(){
+    clearResultObjectUrls();
+    showDeckDetail(currentDeckId);
+  });
+
+  /* キーボード操作 */
+
+  document.addEventListener("keydown",function(event){
+    if(!G("view-session").classList.contains("active")){
+      return;
+    }
+
+    if(answerLocked)return;
+
+    if(event.key===" "||event.key==="Enter"){
+      event.preventDefault();
+
+      if(!isFlipped){
+        flipCard();
+      }
+
+      return;
+    }
+
+    if(isFlipped&&event.key==="ArrowLeft"){
+      answerCard(false);
+      return;
+    }
+
+    if(isFlipped&&event.key==="ArrowRight"){
+      answerCard(true);
+    }
+  });
+
+  window.addEventListener("beforeunload",function(){
+    clearSessionObjectUrls();
+    clearResultObjectUrls();
+  });
 }
 
 /* ===== 初期化 ===== */
+
 function init(){
   bindEvents();
-  openDB().then(function(){renderDeckList();});
+
+  openDB()
+    .then(function(){
+      renderDeckList();
+    })
+    .catch(function(error){
+      console.error(error);
+
+      G("deck-list").innerHTML=
+        '<div class="empty-state">'+
+          '<p>データベースを開けませんでした。</p>'+
+          '<p class="text-sm">'+
+            'ブラウザのプライベートモードや保存設定をご確認ください。'+
+          '</p>'+
+        '</div>';
+    });
 }
 
 if(document.readyState==="loading"){
-  document.addEventListener("DOMContentLoaded",init);
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
 }else{
   init();
 }
@@ -1109,4 +2565,3 @@ if(document.readyState==="loading"){
 </script>
 </body>
 </html>
-
